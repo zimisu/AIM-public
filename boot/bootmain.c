@@ -34,8 +34,14 @@ void bootmain(void)
 	struct proghdr *ph, *eph;
 	void (*entry)(void);
 	uchar* pa;
+	struct part_ent *partition_entry;
 
-	elf = (struct elfhdr*)0x10000;
+	//get second partition entry from mbr
+	partition_entry = (part_ent*)(mbr + 446 + 16);
+	/*todo: read from disk*/
+
+	readsect(elf, partition_entry->rel_sector);
+	//elf = (struct elfhdr*)0x10000;
 
 	readseg((uchar*)elf, 4096, 0);
 
@@ -68,7 +74,7 @@ void readsect(void *dst, uint offset) {
  	outb(0x1F4, offset >> 8);
  	outb(0x1F5, offset >> 16);
  	outb(0x1F6, (offset >> 24) | 0xE0);
- 	outb(0x1F7, 0x20);  // cmd 0x20 - read sectors
+ 	outb(0x1F7, 0x20);  
 
  	waitdisk();
  	insl(0x1f0, dst, SECTSIZE / 4);
