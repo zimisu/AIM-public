@@ -23,9 +23,36 @@
 #include <sys/types.h>
 #include <aim/boot.h>
 
+#define SECTSIZE  512
+
+void readseg(uchar*, uint, uint);
+
 __noreturn
 void bootmain(void)
 {
+	struct elfhdr *elf;
+	struct proghdr *ph, *eph;
+	void (*entry)(void);
+	uchar* pa;
+
+	elf = (struct elfhdr*)0x10000;
+
+	readseg((uchar*)elf, 4096, 0);
+
+	if (elf->magic != ELF_MAGIC) return;
+
+	ph = (struct proghdr*)((uchar*)elf + elf->phoff);
+	eph = ph + elf->phnum;
+	for (; ph < eph; ph++) {
+		pa = (uchar*)ph->paddr;
+		readseg(pa, ph->filesz, ph->off);
+		if (ph->memsz > ph->filesz)
+			stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
+	}
+
+	entry = (void(*)(void))(elf->entry);
+	entry();
+
 	while (1);
 }
 

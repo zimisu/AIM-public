@@ -24,6 +24,64 @@
 
 .globl _start
 _start:
+	cli
+	mov		$0, %cs
+	mov		$0, %ss
+	mov		$0, %ds
+	mov		$0, %es
+	
+seta20.1:
+	inb		$0x64, %al
+	testb	$0x2, %al
+	jnz		seta20.1
+	movb	$0xd1, %al
+	outb	%al, $0x64
+
+set20.2:
+	inb		$0x64, %al
+	testb	$0x2, %al
+	jnz		seta20.2
+	movb	$0xdf, %al
+	outb	%al, $0x60
+
+	lgdt	gdtdesc
+	movl	%cr0, %eax
+	orl		%CRO_PE, %eax
+	movl	%eax, %cr0
+	
+	ljmp	$(SEG_KCODE<<3), $start32
+
+.code32
+start32:
+	movw	$(SEG_KDATA<<3), %ax
+	movw	%ax, %ds
+	movw	%ax, %es
+	movw	%ax, %ss
+	movw	$0, %ax
+	movw	%ax, %fs
+	movw	%ax, %gs
+
+	movl	%start, %esp
+	%call	bootmain
+
+	movw	$0x8a00, %ax
+	movw	%ax, %dx
+	outw	%ax, %dx
+	movw	%0x8ae0, %ax
+	outw	%ax, %dx
+spin:
+	jmp		spin
+
+.p2align 2
+gdt:
+	SEG_NULLASM
+	SEG_ASM(STA_X|STA_R, 0X0, 0Xffffffff)
+	SEG_ASM(STA_W, 0X0, 0Xffffffff)
+
+gdtdesc:
+	.word	(gdtdesc - gdt - 1)
+	.long gdt
+
 
 .text
 
