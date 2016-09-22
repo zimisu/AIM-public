@@ -56,3 +56,33 @@ void bootmain(void)
 	while (1);
 }
 
+
+void waitdisk(void) {
+	while((inb(0x1f7) & 0xc0) != 0x40);
+}
+
+void readsect(void *dst, uint offset) {
+	waitdisk();
+	outb(0x1f2, 1);
+	outb(0x1f3, offset);
+ 	outb(0x1F4, offset >> 8);
+ 	outb(0x1F5, offset >> 16);
+ 	outb(0x1F6, (offset >> 24) | 0xE0);
+ 	outb(0x1F7, 0x20);  // cmd 0x20 - read sectors
+
+ 	waitdisk();
+ 	insl(0x1f0, dst, SECTSIZE / 4);
+}
+
+void readseg(uchar* pa, uint count, uint offset) {
+	uchar* epa;
+
+	epa = pa + count;
+
+	pa -= offset % SECTSIZE;
+
+	offset = (offset / SECTSIZE) + 1;
+
+	for (; pa < epa; pa += SECTSIZE, offset++) 
+		readsect(pa, offset);
+}
