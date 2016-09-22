@@ -40,10 +40,9 @@ void bootmain(void)
 	partition_entry = (part_ent*)(mbr + 446 + 16);
 	/*todo: read from disk*/
 
-	readsect(elf, partition_entry->rel_sector);
-	//elf = (struct elfhdr*)0x10000;
+	elf = (struct elfhdr*)0x10000;
 
-	readseg((uchar*)elf, 4096, 0);
+	readseg((uchar*)elf, 4096, partition_entry->rel_sector);
 
 	if (elf->magic != ELF_MAGIC) return;
 
