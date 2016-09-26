@@ -28,7 +28,7 @@
 ENTRY(_start)
 
 SECTIONS {
-	. = 0x7c00 - 0x24;
+	. = 0x7c00;
 	.text : {
 		*bootasm.o(.text)
 		*(.text);

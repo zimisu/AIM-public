@@ -40,14 +40,11 @@ void bootmain(void)
 	uint8_t* pa;
 	//struct part_ent *partition_entry;
 
-	//get second partition entry from mbr
 	mbr = (uint8_t*)(0x7dbe);
-	//partition_entry = (struct part_ent*)(mbr + 16 + 8);
-	/*todo: read from disk*/
 
 	elf = (struct elf32hdr*)0x10000;
 
-	readseg((uint8_t*)elf, 4096, (*(uint32_t *)(mbr + 16 + 8)) * 512);
+	readseg((uint8_t*)elf, 8192, (*(uint32_t *)(mbr + 16 + 8)) * 512);
 
 	if (*((uint32_t *)(elf->e_ident)) != ELF_MAGIC) return;
 
@@ -62,8 +59,6 @@ void bootmain(void)
 
 	entry = (void(*)(void))(elf->e_entry);
 	entry();
-
-	while (1);
 }
 
 

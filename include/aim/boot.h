@@ -23,22 +23,6 @@
 
 extern uint8_t *mbr;
 
-#pragma pack(push)
-#pragma pack(1)
-struct part_ent {
-	uint8_t status;
-	//uint8_t head;
-	//uint16_t sector : 6;
-	//uint16_t cylinder : 10;
-	uint32_t addr: 24;
-	uint8_t flag;
-	uint8_t end_head;
-	uint16_t end_sector;
-	uint32_t rel_sector;
-	uint32_t sector_num;
-};
-#pragma pack(pop)
-
 #endif /* !__ASSEMBLER__ */
 
 #include <arch-boot.h>
