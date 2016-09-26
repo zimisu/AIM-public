@@ -21,7 +21,7 @@
 
 #ifndef __ASSEMBLER__
 
-extern uint8_t mbr[];
+extern uint8_t *mbr;
 
 #pragma pack(push)
 #pragma pack(1)

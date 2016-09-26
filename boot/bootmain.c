@@ -20,42 +20,47 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include "x86.h"
 #include <sys/types.h>
 #include <aim/boot.h>
+#include <elf.h>
 
 #define SECTSIZE  512
 
-void readseg(uchar*, uint, uint);
+void readseg(uint8_t*, uint32_t, uint32_t);
+
+uint8_t *mbr;
 
 __noreturn
 void bootmain(void)
 {
-	struct elfhdr *elf;
-	struct proghdr *ph, *eph;
+	struct elf32hdr *elf;
+	struct elf32_phdr *ph, *eph;
 	void (*entry)(void);
-	uchar* pa;
+	uint8_t* pa;
 	struct part_ent *partition_entry;
 
 	//get second partition entry from mbr
-	partition_entry = (part_ent*)(mbr + 446 + 16);
+	mbr = (uint8_t*)(0x7dbe);
+	partition_entry = (struct part_ent*)(mbr + 16 + 8);
 	/*todo: read from disk*/
 
-	elf = (struct elfhdr*)0x10000;
+	elf = (struct elf32hdr*)0x10000;
 
-	readseg((uchar*)elf, 4096, partition_entry->rel_sector);
+	readseg((uint8_t*)elf, 4096, partition_entry->rel_sector);
 
-	if (elf->magic != ELF_MAGIC) return;
+	if (*((uint32_t *)(elf->e_ident)) != ELF_MAGIC) return;
 
-	ph = (struct proghdr*)((uchar*)elf + elf->phoff);
-	eph = ph + elf->phnum;
+	ph = (struct elf32_phdr*)((uint8_t*)elf + elf->e_phoff);
+	eph = ph + elf->e_phnum;
 	for (; ph < eph; ph++) {
-		pa = (uchar*)ph->paddr;
-		readseg(pa, ph->filesz, ph->off);
-		if (ph->memsz > ph->filesz)
-			stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
+		pa = (uint8_t*)ph->p_paddr;
+		readseg(pa, ph->p_filesz, ph->p_offset);
+		if (ph->p_memsz > ph->p_filesz)
+			stosb(pa + ph->p_filesz, 0, ph->p_memsz - ph->p_filesz);
 	}
 
-	entry = (void(*)(void))(elf->entry);
+	entry = (void(*)(void))(elf->e_entry);
 	entry();
 
 	while (1);
@@ -66,7 +71,7 @@ void waitdisk(void) {
 	while((inb(0x1f7) & 0xc0) != 0x40);
 }
 
-void readsect(void *dst, uint offset) {
+void readsect(void *dst, uint32_t offset) {
 	waitdisk();
 	outb(0x1f2, 1);
 	outb(0x1f3, offset);
@@ -79,8 +84,8 @@ void readsect(void *dst, uint offset) {
  	insl(0x1f0, dst, SECTSIZE / 4);
 }
 
-void readseg(uchar* pa, uint count, uint offset) {
-	uchar* epa;
+void readseg(uint8_t* pa, uint32_t count, uint32_t offset) {
+	uint8_t* epa;
 
 	epa = pa + count;
 

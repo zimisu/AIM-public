@@ -19,9 +19,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
+#include "asm.h"
+#include "mmu.h"
 
-.section .entry
-
+.text
 .globl _start
 _start:
 	cli
@@ -63,13 +64,13 @@ start32:
 	movw	%ax, %fs
 	movw	%ax, %gs
 
-	movl	$start, %esp
+	movl	$_start, %esp
 	call	bootmain
 
 	movw	$0x8a00, %ax
 	movw	%ax, %dx
 	outw	%ax, %dx
-	movw	%0x8ae0, %ax
+	movw	$0x8ae0, %ax
 	outw	%ax, %dx
 spin:
 	jmp		spin
@@ -84,8 +85,4 @@ gdtdesc:
 	.word	(gdtdesc - gdt - 1)
 	.long gdt
 
-
-.text
-
-bootasm:
 
