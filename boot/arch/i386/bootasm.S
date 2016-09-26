@@ -24,6 +24,8 @@
 
 .text
 .globl _start
+
+.code16
 _start:
 	cli
   	xorw    %ax,%ax

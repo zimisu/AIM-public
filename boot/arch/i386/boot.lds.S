@@ -28,10 +28,10 @@
 ENTRY(_start)
 
 SECTIONS {
-	. = 0x7c00;
+	. = 0x7c00 - 0x24;
 	.text : {
-		*bootasm.o(.text);
-		*(.text)
+		*bootasm.o(.text)
+		*(.text);
 	}
 	.data : {
 		*(.data);
@@ -39,4 +39,5 @@ SECTIONS {
 	.bss : {
 		*(.bss);
 	}
+	_end = .;
 }

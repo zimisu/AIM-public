@@ -38,16 +38,16 @@ void bootmain(void)
 	struct elf32_phdr *ph, *eph;
 	void (*entry)(void);
 	uint8_t* pa;
-	struct part_ent *partition_entry;
+	//struct part_ent *partition_entry;
 
 	//get second partition entry from mbr
 	mbr = (uint8_t*)(0x7dbe);
-	partition_entry = (struct part_ent*)(mbr + 16 + 8);
+	//partition_entry = (struct part_ent*)(mbr + 16 + 8);
 	/*todo: read from disk*/
 
 	elf = (struct elf32hdr*)0x10000;
 
-	readseg((uint8_t*)elf, 4096, partition_entry->rel_sector);
+	readseg((uint8_t*)elf, 4096, (*(uint32_t *)(mbr + 16 + 8)) * 512);
 
 	if (*((uint32_t *)(elf->e_ident)) != ELF_MAGIC) return;
 
