@@ -23,9 +23,19 @@
 #include <sys/types.h>
 #include <aim/init.h>
 
+ void clear_bss() {
+ 	extern int __bss_start, __bss_end;
+ 	int *p = &__bss_start;
+
+ 	for (; p < &__bss_end; p++)
+ 		*p = 0;
+ }
+
 __noreturn
 void master_early_init(void)
 {
+	clear_bss();
+
 	arch_early_init();
 	goto panic;
 
