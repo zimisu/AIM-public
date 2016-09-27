@@ -44,7 +44,9 @@ void bootmain(void)
 
 	elf = (struct elf32hdr*)0x10000;
 
-	readseg((uint8_t*)elf, 8192, (*(uint32_t *)(mbr + 16 + 8)) * 512);
+	uint32_t offset = (*(uint32_t *)(mbr + 16 + 8)) * 512;
+
+	readseg((uint8_t*)elf, 8192, offset);
 
 	if (*((uint32_t *)(elf->e_ident)) != ELF_MAGIC) return;
 
@@ -52,7 +54,7 @@ void bootmain(void)
 	eph = ph + elf->e_phnum;
 	for (; ph < eph; ph++) {
 		pa = (uint8_t*)ph->p_paddr;
-		readseg(pa, ph->p_filesz, ph->p_offset);
+		readseg(pa, ph->p_filesz, ph->p_offset + offset);
 		if (ph->p_memsz > ph->p_filesz)
 			stosb(pa + ph->p_filesz, 0, ph->p_memsz - ph->p_filesz);
 	}
@@ -86,7 +88,7 @@ void readseg(uint8_t* pa, uint32_t count, uint32_t offset) {
 
 	pa -= offset % SECTSIZE;
 
-	offset = (offset / SECTSIZE) + 1;
+	offset = (offset / SECTSIZE);
 
 	for (; pa < epa; pa += SECTSIZE, offset++) 
 		readsect(pa, offset);
