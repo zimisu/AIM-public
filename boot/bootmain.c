@@ -38,13 +38,14 @@ void bootmain(void)
 	struct elf32_phdr *ph, *eph;
 	void (*entry)(void);
 	uint8_t* pa;
-	//struct part_ent *partition_entry;
 
 	mbr = (uint8_t*)(0x7dbe);
 
 	elf = (struct elf32hdr*)0x10000;
 
-	uint32_t offset = (*(uint32_t *)(mbr + 16 + 8)) * 512;
+	//partition table starts from mbr + 16; 
+	//the size of every entry is 8, so the second partition entry starts from mbr + 16 + 8
+	uint32_t offset = (*(uint32_t *)(mbr + 16 + 8)) * SECTSIZE;
 
 	readseg((uint8_t*)elf, 8192, offset);
 

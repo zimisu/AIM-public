@@ -30,6 +30,7 @@ void master_early_init(void)
 	goto panic;
 
 panic:
-	while (1);
+	//while (1);
+	asm volatile("hlt");
 }
 
