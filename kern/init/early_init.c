@@ -26,10 +26,11 @@
 
  void clear_bss() {
  	extern int __bss_start, __bss_end;
- 	int *p = &__bss_start;
+ 	//int *p = &__bss_start;
 
- 	for (; p < &__bss_end; p++)
- 		*p = 0;
+ 	stosb(&__bss_start, 0, (&__bss_end - &__bss_start) * 4);
+ 	//for (; p < &__bss_end; p++)
+ 		//*p = 0;
  }
 
 __noreturn
