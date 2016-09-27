@@ -41,6 +41,7 @@ void master_early_init(void)
 
 panic:
 	//while (1);
+	// todo: platform independent?
 	asm volatile("hlt");
 }
 
