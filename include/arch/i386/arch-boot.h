@@ -20,7 +20,7 @@
 #define _ARCH_BOOT_H
 
 #ifndef __ASSEMBLER__
-
+#include "x86.h"
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !_ARCH_BOOT_H */

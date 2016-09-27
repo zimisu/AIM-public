@@ -20,6 +20,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include "arch-boot.h"
 #include <sys/types.h>
 #include <aim/init.h>
 
@@ -41,7 +42,6 @@ void master_early_init(void)
 
 panic:
 	//while (1);
-	// todo: platform independent?
-	asm volatile("hlt");
+	hlt();
 }
 
