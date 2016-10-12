@@ -20,16 +20,29 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include "arch-boot.h"
 #include <sys/types.h>
 #include <aim/init.h>
+
+ void clear_bss() {
+ 	extern int __bss_start, __bss_end;
+ 	//int *p = &__bss_start;
+
+ 	stosb(&__bss_start, 0, (&__bss_end - &__bss_start) * 4);
+ 	//for (; p < &__bss_end; p++)
+ 		//*p = 0;
+ }
 
 __noreturn
 void master_early_init(void)
 {
+	clear_bss();
+
 	arch_early_init();
 	goto panic;
 
 panic:
-	while (1);
+	//while (1);
+	hlt();
 }
 

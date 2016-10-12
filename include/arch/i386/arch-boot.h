@@ -21,6 +21,8 @@
 
 #ifndef __ASSEMBLER__
 
+#include "x86.h"
+
 typedef struct elf32hdr		elf_hdr;
 typedef struct elf32_phdr	elf_phdr;
 

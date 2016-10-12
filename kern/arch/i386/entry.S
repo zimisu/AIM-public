@@ -20,8 +20,14 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+
 .text
 
-.globl _start
-_start:
-
+.globl master_early_entry
+master_early_entry:
+	cli
+	push 	%ebp
+	mov 	%esp, %ebp
+	call 	master_early_init
+	pop 	%ebp
+	ret
