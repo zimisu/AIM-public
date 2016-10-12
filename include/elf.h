@@ -421,5 +421,7 @@ typedef struct elf64_phdr {
 #define PF_R		(1 << 2)	/* Segment is readable */
 #define PF_MASKOS	0x0ff00000	/* OS-specific */
 #define PF_MASKPROC	0xf0000000	/* Processor-specific */
+   
+#define ELF_MAGIC 0x464C457FU 
 
 #endif

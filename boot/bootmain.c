@@ -63,3 +63,35 @@ void bootmain(void)
 	entry();
 }
 
+
+
+
+void waitdisk(void) {
+	while((inb(0x1f7) & 0xc0) != 0x40);
+}
+
+void readsect(void *dst, uint32_t offset) {
+	waitdisk();
+	outb(0x1f2, 1);
+	outb(0x1f3, offset);
+ 	outb(0x1F4, offset >> 8);
+ 	outb(0x1F5, offset >> 16);
+ 	outb(0x1F6, (offset >> 24) | 0xE0);
+ 	outb(0x1F7, 0x20);  
+
+ 	waitdisk();
+ 	insl(0x1f0, dst, SECTSIZE / 4);
+}
+
+void readseg(uint8_t* pa, uint32_t count, uint32_t offset) {
+	uint8_t* epa;
+
+	epa = pa + count;
+
+	pa -= offset % SECTSIZE;
+
+	offset = (offset / SECTSIZE);
+
+	for (; pa < epa; pa += SECTSIZE, offset++) 
+		readsect(pa, offset);
+}
