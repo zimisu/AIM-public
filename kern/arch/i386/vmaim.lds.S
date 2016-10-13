@@ -30,8 +30,8 @@
 ENTRY(master_early_entry)
 
 SECTIONS {
-	. = 0x20000;
-	.text : {*(.text);}
+	. = 0x80100000;
+	.text : AT(0X100000) {*(.text);}
 	.data : {*(.data);}
 	__bss_start = .;
 	.bss : {*(.bss);}
