@@ -28,7 +28,7 @@ _start:
 	cli
 	cld
 	/* Set up the stack pointer */
-	mov	$kstack_top, %esp
+	mov	$(kstack_top-KERN_BASE), %esp
 	xor	%eax, %eax
 	push	%eax		// eip=0
 	push	%eax		// ebp=0
@@ -37,3 +37,5 @@ _start:
 	/* and there we go */
 	call	master_early_init
 
+.globl _start_addr
+_start_addr = _start - KERN_BASE

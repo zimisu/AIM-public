@@ -22,8 +22,24 @@
 
 #include <sys/types.h>
 #include <aim/mmu.h>
+#include <arch-mmu.h>
+#include <util.h>
 
 void mmu_init(pgindex_t *boot_page_index)
 {
+
+ 	pde_t *addr = V2P_WO(boot_page_index);
+ 	asm (
+ 		"movl    %%cr4, %%eax;"
+ 		"orl     $(#CR4_PSE), %%eax;"
+ 		"movl    %%eax, %%cr4;"
+ 		"movl    %0, %%eax;"
+ 		"movl    %%eax, %%cr3;"
+ 		"movl    %cr0, %eax;"
+ 		"orl     $((#CR0_PG)|(#CR0_WP), %eax;"
+ 		"movl    %eax, %cr0;"
+ 		: "=r"(addr)
+ 	);
+
 }
 

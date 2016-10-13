@@ -27,13 +27,13 @@
  * linker script.
  */
 
-ENTRY(_start)
+ENTRY(_start_addr)
 
 SECTIONS
 {
-	. = KERN_START;
+	. = KERN_BASE + KERN_START;
 
-	.text : {
+	.text : AT(KERN_START) {
 		*(.text);
 	}
 

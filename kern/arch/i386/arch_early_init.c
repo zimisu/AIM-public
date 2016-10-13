@@ -22,9 +22,36 @@
 
 #include <sys/types.h>
 #include <aim/init.h>
+#include <arch-mmu.h>
+#include <x86.h>
+#include <mmu.h>
+
+struct segdesc gdt[NSEGS];
+
+__attribute__((__aligned__(PGSIZE)))
+pde_t entrypgdir[NPDENTRIES] = {
+  // Map VA's [0, 4MB) to PA's [0, 4MB)
+  [0] = (0) | PTE_P | PTE_W | PTE_PS,
+  // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
+  [KERN_BASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
+};
+
+void seginit(void) {
+	gdt[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
+	gdt[SEG_KDATA] = SEG(STA_W, 0, 0xffffffff, 0);
+	gdt[SEG_UCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER);
+	gdt[SEG_UDATA] = SEG(STA_W, 0, 0xffffffff, DPL_USER);
+
+	// Map cpu and proc -- these are private per cpu.
+	//gdt[SEG_KCPU] = SEG(STA_W, &c->cpu, 8, 0);
+
+	lgdt(gdt, sizeof(gdt));
+	//loadgs(SEG_KCPU << 3);
+}
 
 void arch_early_init(void)
 {
-
+	seginit();
+	mmu_init(entrypgdir);
 }
 
