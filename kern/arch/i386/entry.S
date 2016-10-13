@@ -19,6 +19,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
+#include <mmu.h>
 
 
 .text
@@ -29,18 +30,15 @@ master_early_entry:
 	push 	%ebp
 	mov 	%esp, %ebp
 
- 	# Turn on page size extension for 4Mbyte pages
- 	movl    %cr4, %eax
- 	orl     $(CR4_PSE), %eax
- 	movl    %eax, %cr4
- 	# Set page directory
- 	movl    $(V2P_WO(entrypgdir)), %eax
- 	movl    %eax, %cr3
+	call 	master_early_init
+
  	# Turn on paging.
  	movl    %cr0, %eax
  	orl     $(CR0_PG|CR0_WP), %eax
  	movl    %eax, %cr0
 
-	call 	master_early_init
 	pop 	%ebp
 	ret
+
+.globl _start_addr
+_start_addr = master_early_entry - KERN_BASE

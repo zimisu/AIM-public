@@ -53,6 +53,8 @@ typedef unsigned long long	uint64_t;
 typedef signed long long	int64_t;
 
 typedef unsigned long ulong;
+typedef unsigned short ushort;
+typedef unsigned int uint;
 
 typedef unsigned int bool;
 #define false	0

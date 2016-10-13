@@ -22,8 +22,20 @@
 
 #include <sys/types.h>
 #include <aim/mmu.h>
+#include <arch-mmu.h>
+#include <util.h>
 
-void mmu_init(pgindex_t *boot_page_index)
-{
+void mmu_init(pgindex_t *boot_page_index) {
+ 	// Turn on page size extension for 4Mbyte pages
+ 	pde_t *addr = V2P_WO(boot_page_index);
+ 	asm (
+ 		"movl    %%cr4, %%eax;"
+ 		"orl     $(#CR4_PSE), %%eax;"
+ 		"movl    %%eax, %%cr4;"
+ 		"movl    %0, %%eax;"
+ 		"movl    %%eax, %%cr3;"
+ 		: "=r"(addr)
+ 	);
+
 }
 

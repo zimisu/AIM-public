@@ -27,14 +27,21 @@
  * linker script.
  */
 
-ENTRY(master_early_entry)
+
+ENTRY(_start_addr)
 
 SECTIONS {
-	. = 0x80100000;
-	.text : AT(0X100000) {*(.text);}
+	//. = KERN_BASE + KERN_START;
+	.text : AT(KERN_START) {*(.text);}
 	.data : {*(.data);}
 	__bss_start = .;
-	.bss : {*(.bss);}
+	.bss : {
+		*(.bss);
+		. = ALIGN(4096);
+		PROVIDE(kstack = .);
+		. += KSTACKSIZE;
+		PROVIDE(kstack_top = .);
+	}
 	__bss_end = .;
 	_end = .;
 }

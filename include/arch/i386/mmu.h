@@ -54,9 +54,6 @@
 #ifndef __ASSEMBLER__
 // Segment Descriptor
 
-typedef unsigned int uint;
-typedef unsigned short ushort;
-
 struct segdesc {
   uint lim_15_0 : 16;  // Low bits of segment limit
   uint base_15_0 : 16; // Low bits of segment base address
