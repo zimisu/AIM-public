@@ -56,7 +56,6 @@ void insl(int port, void *addr, int cnt)
 		"memory",
 		 "cc"
 	);
-	return 0;
 }
 
 static inline
