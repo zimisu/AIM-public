@@ -26,24 +26,21 @@
 #include <x86.h>
 #include <mmu.h>
 
-struct segdesc gdt[NSEGS];
+struct segdesc gdt[NSEGS] = {
+	SEG(0x0, 0x0, 0x0, 0x0),			// null seg
+	SEG(STA_X|STA_R, 0, 0xffffffff, 0),		// kernel code
+	SEG(STA_W, 0, 0xffffffff, 0),			// kernel data
+	SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER),	// user code
+	SEG(STA_W, 0, 0xffffffff, DPL_USER)		// user data
+};
 
 
-void seginit(void) {
-	gdt[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
-	gdt[SEG_KDATA] = SEG(STA_W, 0, 0xffffffff, 0);
-	gdt[SEG_UCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER);
-	gdt[SEG_UDATA] = SEG(STA_W, 0, 0xffffffff, DPL_USER);
-
-	// Map cpu and proc -- these are private per cpu.
-	//gdt[SEG_KCPU] = SEG(STA_W, &c->cpu, 8, 0);
-
-	lgdt(gdt, sizeof(gdt));
-	//loadgs(SEG_KCPU << 3);
-}
-
+__noreturn void open_4MB_page();
 void arch_early_init(void)
 {
-	seginit();
+	lgdt(gdt, sizeof(gdt));
+
+	early_mm_init();
+	open_4MB_page();
 }
 

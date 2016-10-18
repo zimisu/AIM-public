@@ -24,6 +24,8 @@
 typedef uint32_t	pde_t;
 typedef uint32_t	pte_t;
 
+extern pde_t entrypgdir[];
+
 typedef pde_t	pgindex_t;
 
 #endif /* !__ASSEMBLER__ */

@@ -21,6 +21,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <sys/types.h>
+#include <aim/panic.h>
 #include <aim/init.h>
 
 __noreturn
@@ -30,6 +31,7 @@ void master_early_init(void)
 	goto panic;
 
 panic:
-	while (1);
+	//while (1);
+	panic("panic");
 }
 

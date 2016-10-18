@@ -57,4 +57,3 @@ void panic(const char *fmt, ...)
 {
 	__local_panic();
 }
-

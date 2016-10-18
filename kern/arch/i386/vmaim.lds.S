@@ -48,5 +48,6 @@ SECTIONS
 		. += KSTACKSIZE;
 		PROVIDE(kstack_top = .);
 	}
+	_end = .;
 }
 
