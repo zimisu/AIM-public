@@ -23,12 +23,22 @@
 #include <sys/types.h>
 #include <aim/mmu.h>
 #include <arch-mmu.h>
+#include <mmu.h>
 #include <util.h>
 
-void mmu_init(pgindex_t *boot_page_index)
-{
+__attribute__((__aligned__(PGSIZE)))
+pde_t entrypgdir[NPDENTRIES] = {
+  // Map VA's [0, 4MB) to PA's [0, 4MB)
+  [0] = (0) | PTE_P | PTE_W | PTE_PS,
+  // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
+  [KERN_BASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
+};
 
- 	pde_t *addr = V2P_WO(boot_page_index);
+void mmu_init(pgindex_t *boot_page_index) {
+}
+
+void write_pgdir_addr() {
+ 	pde_t *addr = V2P_WO(entrypgdir);
  	asm (
  		"movl    %%cr4, %%eax;"
  		"orl     $(#CR4_PSE), %%eax;"
@@ -40,6 +50,18 @@ void mmu_init(pgindex_t *boot_page_index)
  		"movl    %eax, %cr0;"
  		: "=r"(addr)
  	);
-
 }
 
+
+/* Initialize a page index table and fill in the structure @pgindex */
+pgindex_t *init_pgindex(void) {
+	write_pgdir_addr();
+}
+/* Destroy the page index table itself assuming that everything underlying is
+ * already done with */
+//void destroy_pgindex(pgindex_t *pgindex);
+/* Map virtual address starting at @vaddr to physical pages at @paddr, with
+ * VMA flags @flags (VMA_READ, etc.) Additional flags apply as in kmmap.h.
+ */
+//int map_pages(pgindex_t *pgindex, void *vaddr, addr_t paddr, size_t size,
+ //   uint32_t flags);

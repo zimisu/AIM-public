@@ -116,7 +116,7 @@
 #define PTRCAST(x)		((void *)ULCAST(x))
 
 #define V2P_WO(x) ((x) - KERN_BASE)
-#define V2P_WO(x) ((uint)(x) - KERN_BASE)
+#define V2P(x) ((uint)(x) - KERN_BASE)
 	
 #else	/* __ASSEMBLER__ */
 

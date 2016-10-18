@@ -28,13 +28,6 @@
 
 struct segdesc gdt[NSEGS];
 
-__attribute__((__aligned__(PGSIZE)))
-pde_t entrypgdir[NPDENTRIES] = {
-  // Map VA's [0, 4MB) to PA's [0, 4MB)
-  [0] = (0) | PTE_P | PTE_W | PTE_PS,
-  // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
-  [KERN_BASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
-};
 
 void seginit(void) {
 	gdt[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
@@ -52,6 +45,5 @@ void seginit(void) {
 void arch_early_init(void)
 {
 	seginit();
-	mmu_init(entrypgdir);
 }
 
