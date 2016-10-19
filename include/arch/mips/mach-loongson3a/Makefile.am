@@ -17,12 +17,6 @@
 
 include $(top_srcdir)/env.am
 
-SUBDIRS = \
-	mach-loongson3a
-
 noinst_HEADERS = \
-	arch-boot.h \
-	arch-io.h \
-	arch-mmu.h \
-	platform.h
+	mach-platform.h
 
