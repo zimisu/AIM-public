@@ -19,6 +19,7 @@ include $(top_srcdir)/env.am
 
 SUBDIRS = \
 	arch \
+	dev \
 	init \
 	mm \
 	panic
@@ -36,7 +37,8 @@ KERN_LIBS = \
 	init/libearlyinit.la \
 	mm/libmm.la \
 	panic/libpanic.la \
-	arch/$(ARCH)/libarch.la
+	arch/$(ARCH)/libarch.la \
+	../drivers/libdrivers.la
 
 libkernel_la_SOURCES =
 libkernel_la_LIBADD = $(KERN_LIBS)

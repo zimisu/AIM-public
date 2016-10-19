@@ -17,16 +17,7 @@
 
 include $(top_srcdir)/env.am
 
-ACLOCAL_AMFLAGS = -I ./m4
+noinst_LTLIBRARIES = libdev.la
 
-if BUILD_BOOTLOADER
-BOOT = boot
-endif
-
-SUBDIRS = \
-	include \
-	lib \
-	drivers \
-	$(BOOT) \
-	kern
+libdev_la_SOURCES = console.c
 

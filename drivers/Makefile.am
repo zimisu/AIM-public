@@ -19,7 +19,8 @@
 include $(top_srcdir)/env.am
 
 SUBDIRS = \
-	io
+	io \
+	serial
 
 noinst_LTLIBRARIES = libdrivers-raw.la libdrivers.la
 

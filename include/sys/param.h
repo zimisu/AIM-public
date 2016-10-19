@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
+/* Copyright (C) 2016 Gan Quan <coin2028@hotmail.com>
  *
  * This file is part of AIM.
  *
@@ -16,25 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARCH_MMU_H
-#define _ARCH_MMU_H
+#ifndef _SYS_PARAM_H
+#define _SYS_PARAM_H
 
-/* addresses before and after early MMU mapping */
-#define __premap_addr(kva)	(ULCAST(kva) - KERN_BASE)
-#define __postmap_addr(pa)	(ULCAST(pa) + KERN_BASE)
+#include <sys/types.h>
 
-/* kernel virtual address and physical address conversion */
-#define kva2pa(kva)		(ULCAST(kva) - KERN_BASE)
-#define pa2kva(pa)		(PTRCAST(pa) + KERN_BASE)
+/*
+ * Kernel hyper-parameters which probably should not reside in configure script
+ */
 
-#ifndef __ASSEMBLER__
+#define NODEV	((dev_t)(-1))
+#define NOMAJOR	((unsigned int)(-1))
+#define MAJOR_MAX	16
+#define DEVICE_MAX	32
+#define SECTOR_SIZE	512
+#define JUNKBYTE	0x20
 
-typedef uint32_t	pde_t;
-typedef uint32_t	pte_t;
-
-typedef pde_t	pgindex_t;
-
-#endif /* !__ASSEMBLER__ */
-
-#endif /* !_ARCH_MMU_H */
-
+#endif

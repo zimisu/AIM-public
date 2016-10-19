@@ -23,5 +23,6 @@ noinst_HEADERS = \
 	arch-mmu.h \
 	asm.h \
 	cr.h \
+	platform.h \
 	segment.h
 
