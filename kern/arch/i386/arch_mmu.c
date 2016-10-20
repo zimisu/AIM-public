@@ -38,43 +38,14 @@ void early_mm_init(void) {
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE);
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)P2V(0), (uint32_t)&_end - KERN_BASE);
 }
-/*
-void open_4MB_page() {
- 	pde_t *addr = V2P_WO(entrypgdir);
- 	asm (
- 		"movl    %%cr4, %%eax;"
- 		"orl     $(#CR4_PSE), %%eax;"
- 		"movl    %%eax, %%cr4;"
- 		"movl    %0, %%eax;"
- 		"movl    %%eax, %%cr3;"
- 		"movl    %%cr0, %%eax;"
- 		"orl     $((#CR0_PG)|(#CR0_WP), %%eax;"
- 		"movl    %%eax, %%cr0;"
- 		: "=r"(addr)
- 	);
-}
-
-void jmp_high_addr() {
-	asm (
-		"mov	$(kstack_top), %%esp;"
-		"mov 	%%esp, %%ebp;"
-
-		"ljmp	$(#SEG_KCODE<<3), $panic;"
-		::
-	);
-	//panic("pinic!");
-}
-*/
 
 int page_index_early_map(pgindex_t *boot_page_index, addr_t paddr,
 	void* vaddr, size_t size) {
 	uint32_t a, last;
 	a = (uint32_t) vaddr;
 	last = ((uint32_t) vaddr) + size - 1;
-	while (a < last) {
+	for (; a < last; a += (1 << 22), paddr += (1 << 22)) {
 		boot_page_index[a >> PDXSHIFT] = paddr | PTE_P | PTE_W | PTE_PS;
-		a += (1 << 22);
-		paddr += (1 << 22);
 	}
 	return 0;
 }
