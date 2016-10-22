@@ -16,27 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARCH_MMU_H
-#define _ARCH_MMU_H
+#ifndef _DRIVERS_IO_MEM_H
+#define _DRIVERS_IO_MEM_H
 
-/* addresses before and after early MMU mapping */
-#define __premap_addr(kva)	(ULCAST(kva) - KERN_BASE)
-#define __postmap_addr(pa)	(ULCAST(pa) + KERN_BASE)
+#ifdef IO_MEM_ROOT
+__attribute__ ((visibility ("hidden")))
+extern struct bus_device early_memory_bus;
+#endif /* IO_MEM_ROOT */
 
-/* kernel virtual address and physical address conversion */
-#define kva2pa(kva)		(ULCAST(kva) - KERN_BASE)
-#define pa2kva(pa)		(PTRCAST(pa) + KERN_BASE)
+int io_mem_init(struct bus_device *memory_bus);
 
-#ifndef __ASSEMBLER__
-
-typedef uint32_t	pde_t;
-typedef uint32_t	pte_t;
-
-extern pde_t entrypgdir[];
-
-typedef pde_t	pgindex_t;
-
-#endif /* !__ASSEMBLER__ */
-
-#endif /* !_ARCH_MMU_H */
+#endif /* _DRIVERS_IO_MEM_H */
 

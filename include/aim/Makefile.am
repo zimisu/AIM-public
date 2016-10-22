@@ -19,11 +19,13 @@ include $(top_srcdir)/env.am
 
 noinst_HEADERS = \
 	boot.h \
+	console.h \
 	debug.h \
 	device.h \
 	early_kmmap.h \
 	gfp.h \
 	init.h \
+	io.h \
 	mmu.h \
 	panic.h \
 	pmm.h

@@ -21,6 +21,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <sys/types.h>
+#include <aim/early_kmmap.h>
 #include <aim/mmu.h>
 #include <arch-mmu.h>
 #include <mmu.h>
@@ -28,10 +29,25 @@
 #include <aim/panic.h>
 
 extern uint32_t _end;
+bool early_mapping_valid(struct early_mapping *entry)
+{
+	return true;
+}
 
 __attribute__((__aligned__(PGSIZE)))
 pde_t entrypgdir[NPDENTRIES];
-void mmu_init(pgindex_t *boot_page_index) {
+void page_index_clear(pgindex_t *index)
+{
+}
+
+int page_index_early_map(pgindex_t *index, addr_t paddr,
+	void *vaddr, size_t length)
+{
+	return -1;
+}
+
+void mmu_init(pgindex_t *boot_page_index)
+{
 }
 
 void early_mm_init(void) {

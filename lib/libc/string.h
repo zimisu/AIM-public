@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
+/* Copyright (C) 2016 Gan Quan <coin2028@hotmail.com>
  *
  * This file is part of AIM.
  *
@@ -16,27 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARCH_MMU_H
-#define _ARCH_MMU_H
+#ifndef _STRING_H
+#define _STRING_H
 
-/* addresses before and after early MMU mapping */
-#define __premap_addr(kva)	(ULCAST(kva) - KERN_BASE)
-#define __postmap_addr(pa)	(ULCAST(pa) + KERN_BASE)
-
-/* kernel virtual address and physical address conversion */
-#define kva2pa(kva)		(ULCAST(kva) - KERN_BASE)
-#define pa2kva(pa)		(PTRCAST(pa) + KERN_BASE)
+#include <sys/types.h>
 
 #ifndef __ASSEMBLER__
 
-typedef uint32_t	pde_t;
-typedef uint32_t	pte_t;
-
-extern pde_t entrypgdir[];
-
-typedef pde_t	pgindex_t;
+void *memset(void *dst, int c, size_t n);
+int memcmp(const void *s1, const void *s2, size_t n);
+void *memcpy(void *dst, const void *src, size_t n);
+void *memmove(void *dst0, const void *src0, size_t length);
+int strcmp(const char *s1, const char *s2);
+size_t strlcat(char *dst, const char *src, size_t dsize);
+size_t strlcpy(char *dst, const char *src, size_t dsize);
+size_t strlen(const char *str);
+size_t strnlen(const char *str, size_t maxlen);
 
 #endif /* !__ASSEMBLER__ */
 
-#endif /* !_ARCH_MMU_H */
+#endif
 

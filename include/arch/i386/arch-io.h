@@ -16,27 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARCH_MMU_H
-#define _ARCH_MMU_H
-
-/* addresses before and after early MMU mapping */
-#define __premap_addr(kva)	(ULCAST(kva) - KERN_BASE)
-#define __postmap_addr(pa)	(ULCAST(pa) + KERN_BASE)
-
-/* kernel virtual address and physical address conversion */
-#define kva2pa(kva)		(ULCAST(kva) - KERN_BASE)
-#define pa2kva(pa)		(PTRCAST(pa) + KERN_BASE)
+#ifndef _ARCH_IO_H
+#define _ARCH_IO_H
 
 #ifndef __ASSEMBLER__
 
-typedef uint32_t	pde_t;
-typedef uint32_t	pte_t;
+/*
+ * We use macros here so that, when involved in lab assignments, students
+ * do not have to implement them all to compile the whole project.
+ * In this way, only invoked routines need to be implemented.
+ */
 
-extern pde_t entrypgdir[];
+#define in8(port)	inb(port)
+#define in16(port)	inw(port)
+#define in32(port)	inl(port)
 
-typedef pde_t	pgindex_t;
+#define out8(port, data)	outb(port, data)
+#define out16(port, data)	outw(port, data)
+#define out32(port, data)	outl(port, data)
 
 #endif /* !__ASSEMBLER__ */
 
-#endif /* !_ARCH_MMU_H */
+#endif /* _ARCH_IO_H */
 

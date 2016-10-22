@@ -1,4 +1,5 @@
-/* Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
+/* Copyright (C) 2016 Gan Quan <coin2028@hotmail.com>
+ * Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
  *
  * This file is part of AIM.
  *
@@ -16,27 +17,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARCH_MMU_H
-#define _ARCH_MMU_H
+#ifndef _MACH_PLATFORM_H
+#define _MACH_PLATFORM_H
 
-/* addresses before and after early MMU mapping */
-#define __premap_addr(kva)	(ULCAST(kva) - KERN_BASE)
-#define __postmap_addr(pa)	(ULCAST(pa) + KERN_BASE)
+#define LOONGSON3A_PORTIO_BASE		0x0efdfc000000
+#define LOONGSON3A_UART_BASE		0x1fe001e0
 
-/* kernel virtual address and physical address conversion */
-#define kva2pa(kva)		(ULCAST(kva) - KERN_BASE)
-#define pa2kva(pa)		(PTRCAST(pa) + KERN_BASE)
+/* for UART */
+#define UART_BASE	LOONGSON3A_UART_BASE
+#define UART_FREQ	2073600
 
-#ifndef __ASSEMBLER__
+#define EARLY_CONSOLE_BUS	(&early_memory_bus)
+#define EARLY_CONSOLE_BASE	UART_BASE
+#define EARLY_CONSOLE_MAPPING	MAP_NONE
 
-typedef uint32_t	pde_t;
-typedef uint32_t	pte_t;
-
-extern pde_t entrypgdir[];
-
-typedef pde_t	pgindex_t;
-
-#endif /* !__ASSEMBLER__ */
-
-#endif /* !_ARCH_MMU_H */
+#endif /* _MACH_PLATFORM_H */
 
