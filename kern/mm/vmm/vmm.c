@@ -197,7 +197,8 @@ static void __simple_free(void *obj) {
 }
 
 static size_t __simple_size(void *obj) { 
-	return 0; 
+	register struct block_header *p=((struct block_header *)obj) -1;
+	return p->bh_length;
 }
 
 

@@ -86,14 +86,14 @@ void run_on_high_addr() {
 	kprintf("alloc addr: %x\n-----\n", ((uint32_t)d.paddr));*/
 
 	addr_t a, b, c, d;
-	a = kmalloc(5, GFP_ZERO);
-	kprintf("addr: %x\n", a);
+	a = kmalloc(2, GFP_ZERO);
+	kprintf("addr: 0x%llx   size: %llu\n", a, ksize(a));
 	b = kmalloc(5, GFP_ZERO);
-	kprintf("addr: %x\n", b);
+	kprintf("addr: 0x%llx   size: %llu\n", b, ksize(b));
 	kfree(a);
-	c = kmalloc(5, GFP_ZERO);
-	kprintf("addr: %x\n", c);
-	d = kmalloc(5, GFP_ZERO);
-	kprintf("addr: %x\n", d);
-	panic("dfghjkl!!\n");
+	c = kmalloc(15, GFP_ZERO);
+	kprintf("addr: 0x%llx   size: %llu\n", c, ksize(c));
+	d = kmalloc(55, GFP_ZERO);
+	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));
+	panic("The kernel finished!!!\n");
 }
