@@ -22,7 +22,6 @@
 #include <aim/panic.h>
 #include <mmu.h>
 #include <arch-mmu.h>
-
 .text
 
 .globl _start
@@ -54,7 +53,9 @@ open_4MB_page:
 
 	mov		$(kstack_top), %esp
 	mov 	%esp, %ebp
-	ljmp	$(SEG_KCODE<<3), $panic
+	/*ljmp	$(SEG_KCODE<<3), $panic*/
+	movl	$(run_on_high_addr), %eax
+	jmp		*%eax
 
 .globl _start_addr
 _start_addr = _start - KERN_BASE
