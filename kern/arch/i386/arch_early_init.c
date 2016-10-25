@@ -25,6 +25,8 @@
 #include <arch-mmu.h>
 #include <x86.h>
 #include <mmu.h>
+#include <aim/pmm.h>
+#include <aim/vmm.h>
 
 struct segdesc gdt[NSEGS] = {
 	SEG(0x0, 0x0, 0x0, 0x0),			// null seg
@@ -61,5 +63,6 @@ void arch_early_init(void)
 
 void run_on_high_addr() {
 	kputs("high addr!\n");
+	page_allocator_init();
 	panic("dfghjkl!!\n");
 }

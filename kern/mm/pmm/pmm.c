@@ -23,7 +23,6 @@
 #include <sys/types.h>
 #include <sys/param.h>
 //#include <aim/sync.h>
-#include <aim/mmu.h>
 #include <aim/pmm.h>
 #include <libc/string.h>
 #include <util.h>

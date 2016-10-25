@@ -24,6 +24,7 @@
 
 #ifndef __ASSEMBLER__
 
+#include <aim/mmu.h>
 extern uint32_t _end;
 
 #define PAGE_START _end

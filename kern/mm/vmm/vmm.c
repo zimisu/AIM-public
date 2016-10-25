@@ -57,6 +57,7 @@ int simple_allocator_bootstrap(void *pt, size_t size) {
 }
 
 int simple_allocator_init(void) {
+	
 	return 0;
 }
 
