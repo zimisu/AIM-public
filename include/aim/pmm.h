@@ -27,8 +27,8 @@
 #include <aim/mmu.h>
 extern uint32_t _end;
 
-#define PAGE_START _end
-#define FREE_SPACE 4096 * PAGE_SIZE
+#define PAGE_START ((uint32_t)(&_end))
+#define FREE_SPACE (4096 * PAGE_SIZE)
 #define PAGE_NUM (FREE_SPACE / PAGE_SIZE)
 #define BUDDY_TREE_SIZE (PAGE_NUM * 2)
 #define LEFT_LEAF(index) (index * 2 + 1)

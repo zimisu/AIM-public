@@ -30,6 +30,7 @@
 uint32_t buddy_tree[BUDDY_TREE_SIZE];
 
 static uint32_t fixsize(uint32_t size) {
+	size = (size + PAGE_SIZE - 1) >> 12;
 	while (size) {
 		if (IS_POWER_OF_2(size)) 
 			return size;
@@ -53,6 +54,8 @@ static int __alloc(struct pages *pages) {
 		else index = RIGHT_LEAF(index);
 	}
 
+	kprintf("fixed_size: %u   _end: %x  PAGE_NUM: %u\n", fixed_size, &_end, PAGE_NUM);
+	kprintf("index: %u   node_size: %u\n  PAGE_SIZE: %u\n", index, node_size, PAGE_SIZE);
 	buddy_tree[index] = 0;
 	pages->paddr = ((index + 1) * node_size - PAGE_NUM) * PAGE_SIZE + PAGE_START;
 
@@ -169,7 +172,7 @@ addr_t get_free_memory(void)
 int page_allocator_init(void) {
 	uint32_t node_size = PAGE_NUM;
 	for (int i = 0; i < BUDDY_TREE_SIZE; i++) {
-		if (IS_POWER_OF_2(i + 1))
+		if (IS_POWER_OF_2(i + 1) && i)
 			node_size /= 2;
 		buddy_tree[i] = node_size;
 	}
