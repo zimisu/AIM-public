@@ -58,7 +58,7 @@ static int __alloc(struct pages *pages) {
 	kprintf("index: %u   node_size: %u\n  PAGE_SIZE: %u\n", index, node_size, PAGE_SIZE);
 	buddy_tree[index] = 0;
 	pages->paddr = ((index + 1) * node_size - PAGE_NUM) * PAGE_SIZE + PAGE_START;
-
+	kprintf("get page addr: %x\n------------\n\n", pages->paddr);
 	while (index) {
 		index = PARENT(index);
 		buddy_tree[index] = MAX(buddy_tree[LEFT_LEAF(index)], buddy_tree[RIGHT_LEAF(index)]);

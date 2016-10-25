@@ -24,6 +24,7 @@
 #include <sys/param.h>
 //#include <aim/sync.h>
 #include <aim/vmm.h>
+#include <aim/pmm.h>
 #include <aim/mmu.h>	/* PAGE_SIZE */
 #include <aim/panic.h>
 #include <aim/console.h>
@@ -76,9 +77,6 @@ struct size_descriptor sizes[] = {
 	{ NULL,   0,  0, 0,0,0,0 }
 };
 
-addr_t pgalloc(void);
-void pgfree(addr_t paddr);
-
 #define NBLOCKS(order)          (sizes[order].nblocks)
 #define BLOCKSIZE(order)        (sizes[order].size)
 
@@ -96,18 +94,9 @@ int get_order (int size)
 
 /**********************************************/
 
-struct simple_page_link {
-	addr_t vaddr;
-	struct simple_page_link *next;
-};
-
-struct simple_page_link free_pages_head;
-
-struct simple_page_link *free_pages = &free_pages_head;
-
 /* dummy implementations */
 static void *__simple_alloc(size_t size, gfp_t flags) {
-	int order,i,sz;
+	int order,i,sz, tries = 0;
 	struct block_header *p;
 	struct page_descriptor *page;
 
@@ -117,49 +106,51 @@ static void *__simple_alloc(size_t size, gfp_t flags) {
     	kprintf("kmalloc of too large a block (%d bytes).\n",size);
     	return (NULL);
     }
-    if ((page = sizes[order].firstfree) && (p = page->firstfree)) {
-        if (p->bh_flags == MF_FREE) {
-            page->firstfree = p->bh_next;
-            page->nfree--;
-            if (!page->nfree) {
-				sizes[order].firstfree = page->next;
-                page->next = NULL;
-            }
+    for (; tries < 2; tries++) {
+	    if ((page = sizes[order].firstfree) && (p = page->firstfree)) {
+	        if (p->bh_flags == MF_FREE) {
+	            page->firstfree = p->bh_next;
+	            page->nfree--;
+	            if (!page->nfree) {
+					sizes[order].firstfree = page->next;
+	                page->next = NULL;
+	            }
 
-            sizes [order].nmallocs++;
-            sizes [order].nbytesmalloced += size;
-            p->bh_flags =  MF_USED; /* As of now this block is officially in use */
-            p->bh_length = size;
-            return p+1; /* Pointer arithmetic: increments past header */
-        }
-        kprintf("Problem: block on freelist at %08lx isn't free.\n",(long)p);
-        return (NULL);
-    }
-    /* Now we're in trouble: We need to get a new free page..... */
+	            sizes [order].nmallocs++;
+	            sizes [order].nbytesmalloced += size;
+	            p->bh_flags =  MF_USED; /* As of now this block is officially in use */
+	            p->bh_length = size;
+	            return p+1; /* Pointer arithmetic: increments past header */
+	        }
+	        kprintf("Problem: block on freelist at %08lx isn't free.\n",(long)p);
+	        return (NULL);
+	    }
+	    /* Now we're in trouble: We need to get a new free page..... */
 
-    sz = BLOCKSIZE(order);
-    page = (struct page_descriptor *)(uint32_t)pgalloc();
-    if (!page) {
-    	kprintf("Couldn't get a free page.....\n");
-        return NULL;
-    }
-    sizes[order].npages++;
-    for (i=NBLOCKS(order),p=BH (page+1);i > 1;i--,p=p->bh_next) {
-        p->bh_flags = MF_FREE;
-        p->bh_next = BH ( ((long)p)+sz);
-    }
-    /* Last block: */
-    p->bh_flags = MF_FREE;
-    p->bh_next = NULL;
+	    sz = BLOCKSIZE(order);
+	    page = (struct page_descriptor *)(uint32_t)pgalloc();
+	    if (!page) {
+	    	kprintf("Couldn't get a free page.....\n");
+	        return NULL;
+	    }
+	    sizes[order].npages++;
+	    for (i=NBLOCKS(order),p=BH (page+1);i > 1;i--,p=p->bh_next) {
+	        p->bh_flags = MF_FREE; 
+	        p->bh_next = BH ( ((long)p)+sz);
+	    }
+	    /* Last block: */
+	    p->bh_flags = MF_FREE;
+	    p->bh_next = NULL;
 
-    page->order = order;
-    page->nfree = NBLOCKS(order); 
-    page->firstfree = BH(page+1);
+	    page->order = order;
+	    page->nfree = NBLOCKS(order); 
+	    page->firstfree = BH(page+1);
 
-    page->next = sizes[order].firstfree;
-    sizes[order].firstfree = page;
+	    page->next = sizes[order].firstfree;
+	    sizes[order].firstfree = page;
+	}
 
-    return NULL;
+    return p;
 }
 
 static void __simple_free(void *obj) {

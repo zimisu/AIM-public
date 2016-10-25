@@ -63,7 +63,7 @@ void arch_early_init(void)
 
 void run_on_high_addr() {
 	kputs("high addr!\n");
-	page_allocator_init();
+	page_allocator_init();/*
 	struct pages a = {
 		0xffffffff,
 		4096,
@@ -83,6 +83,17 @@ void run_on_high_addr() {
 	free_pages(&a);
 	ret = alloc_pages(&d);
 	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)d.paddr));
+	kprintf("alloc addr: %x\n-----\n", ((uint32_t)d.paddr));*/
+
+	addr_t a, b, c, d;
+	a = kmalloc(5, GFP_ZERO);
+	kprintf("addr: %x\n", a);
+	b = kmalloc(5, GFP_ZERO);
+	kprintf("addr: %x\n", b);
+	kfree(a);
+	c = kmalloc(5, GFP_ZERO);
+	kprintf("addr: %x\n", c);
+	d = kmalloc(5, GFP_ZERO);
+	kprintf("addr: %x\n", d);
 	panic("dfghjkl!!\n");
 }
