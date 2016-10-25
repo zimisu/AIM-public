@@ -26,7 +26,75 @@
 #include <aim/vmm.h>
 #include <aim/mmu.h>	/* PAGE_SIZE */
 #include <aim/panic.h>
+#include <aim/console.h>
 #include <libc/string.h>
+/************ For slab algorithm **************/
+#define MF_USED 0xffaa0055
+#define MF_FREE 0x0055ffaa
+
+struct block_header {
+	unsigned long bh_flags;
+	union {
+		unsigned long ubh_length;
+		struct block_header *fbh_next;
+	} vp;
+};
+
+#define bh_length vp.ubh_length
+#define bh_next   vp.fbh_next
+#define BH(p) ((struct block_header *)(p))
+
+struct page_descriptor {
+	struct page_descriptor *next;
+	struct block_header *firstfree;
+	int order;
+	int nfree;
+};
+
+#define PAGE_DESC(p) ((struct page_descriptor *)(((uint32_t)p) >> 12 << 12))
+
+struct size_descriptor {
+	struct page_descriptor *firstfree;
+	int size;
+	int nblocks;
+
+	int nmallocs;
+	int nfrees;
+	int nbytesmalloced;
+	int npages;
+};
+
+struct size_descriptor sizes[] = { 
+	{ NULL,  32,127, 0,0,0,0 },
+	{ NULL,  64, 63, 0,0,0,0 },
+	{ NULL, 128, 31, 0,0,0,0 },
+	{ NULL, 252, 16, 0,0,0,0 },
+	{ NULL, 508,  8, 0,0,0,0 },
+	{ NULL,1020,  4, 0,0,0,0 },
+	{ NULL,2040,  2, 0,0,0,0 },
+	{ NULL,4080,  1, 0,0,0,0 },
+	{ NULL,   0,  0, 0,0,0,0 }
+};
+
+addr_t pgalloc(void);
+void pgfree(addr_t paddr);
+
+#define NBLOCKS(order)          (sizes[order].nblocks)
+#define BLOCKSIZE(order)        (sizes[order].size)
+
+int get_order (int size)
+{
+	int order;
+
+	/* Add the size of the header */
+	size += sizeof (struct block_header); 
+	for (order = 0;BLOCKSIZE(order);order++)
+		if (size <= BLOCKSIZE (order))
+			return order; 
+	return -1;
+}
+
+/**********************************************/
 
 struct simple_page_link {
 	addr_t vaddr;
@@ -38,12 +106,103 @@ struct simple_page_link free_pages_head;
 struct simple_page_link *free_pages = &free_pages_head;
 
 /* dummy implementations */
-static void *__simple_alloc(size_t size, gfp_t flags) { 
-	return NULL; 
+static void *__simple_alloc(size_t size, gfp_t flags) {
+	int order,i,sz;
+	struct block_header *p;
+	struct page_descriptor *page;
+
+/* Sanity check... */
+	order = get_order (size);
+	if (order < 0) {
+    	kprintf("kmalloc of too large a block (%d bytes).\n",size);
+    	return (NULL);
+    }
+    if ((page = sizes[order].firstfree) && (p = page->firstfree)) {
+        if (p->bh_flags == MF_FREE) {
+            page->firstfree = p->bh_next;
+            page->nfree--;
+            if (!page->nfree) {
+				sizes[order].firstfree = page->next;
+                page->next = NULL;
+            }
+
+            sizes [order].nmallocs++;
+            sizes [order].nbytesmalloced += size;
+            p->bh_flags =  MF_USED; /* As of now this block is officially in use */
+            p->bh_length = size;
+            return p+1; /* Pointer arithmetic: increments past header */
+        }
+        kprintf("Problem: block on freelist at %08lx isn't free.\n",(long)p);
+        return (NULL);
+    }
+    /* Now we're in trouble: We need to get a new free page..... */
+
+    sz = BLOCKSIZE(order);
+    page = (struct page_descriptor *)(uint32_t)pgalloc();
+    if (!page) {
+    	kprintf("Couldn't get a free page.....\n");
+        return NULL;
+    }
+    sizes[order].npages++;
+    for (i=NBLOCKS(order),p=BH (page+1);i > 1;i--,p=p->bh_next) {
+        p->bh_flags = MF_FREE;
+        p->bh_next = BH ( ((long)p)+sz);
+    }
+    /* Last block: */
+    p->bh_flags = MF_FREE;
+    p->bh_next = NULL;
+
+    page->order = order;
+    page->nfree = NBLOCKS(order); 
+    page->firstfree = BH(page+1);
+
+    page->next = sizes[order].firstfree;
+    sizes[order].firstfree = page;
+
+    return NULL;
 }
 
 static void __simple_free(void *obj) {
+	int order;
+	register struct block_header *p=((struct block_header *)obj) -1;
+	struct page_descriptor *page,*pg2;
 
+	page = PAGE_DESC(p);
+	order = page->order;
+
+	p->bh_flags = MF_FREE; 
+
+
+	p->bh_next = page->firstfree;
+	page->firstfree = p;
+	page->nfree ++;
+
+
+	if (page->nfree == 1) { 
+		/* Page went from full to one free block: put it on the freelist */
+   		if (page->next) {
+        	kprintf("Page %p already on freelist dazed and confused....\n", page);
+        } else {
+        	page->next = sizes[order].firstfree;
+        	sizes[order].firstfree = page;
+        }
+    }
+
+	if (page->nfree == NBLOCKS (page->order)) {
+    	if (sizes[order].firstfree == page) {
+        	sizes[order].firstfree = page->next;
+        } else {
+        	for (pg2=sizes[order].firstfree;
+                (pg2 != NULL) && (pg2->next != page);
+				pg2=pg2->next)
+            	/* Nothing */;
+        	if (pg2 != NULL)
+            	pg2->next = page->next;
+        	else
+            	kprintf("Ooops. page %p doesn't show on freelist.\n", page);
+        }
+    	pgfree((addr_t)(uint32_t)(page));
+    }
 }
 
 static size_t __simple_size(void *obj) { 
@@ -57,7 +216,7 @@ int simple_allocator_bootstrap(void *pt, size_t size) {
 }
 
 int simple_allocator_init(void) {
-	
+
 	return 0;
 }
 
