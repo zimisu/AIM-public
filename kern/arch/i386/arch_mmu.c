@@ -27,6 +27,10 @@
 #include <mmu.h>
 #include <util.h>
 #include <aim/panic.h>
+#include <aim/pmm.h>
+
+__attribute__((__aligned__(PGSIZE)))
+pde_t entrypgdir[NPDENTRIES];
 
 extern uint32_t _end;
 bool early_mapping_valid(struct early_mapping *entry)
@@ -34,16 +38,11 @@ bool early_mapping_valid(struct early_mapping *entry)
 	return true;
 }
 
-__attribute__((__aligned__(PGSIZE)))
-pde_t entrypgdir[NPDENTRIES];
 void page_index_clear(pgindex_t *index)
 {
-}
-
-int page_index_early_map(pgindex_t *index, addr_t paddr,
-	void *vaddr, size_t length)
-{
-	return -1;
+	memset(index, 0, (1 << 10) * 4);
+//	if ((*index) & PTE_P)
+//		*index ^= PTE_P;
 }
 
 void mmu_init(pgindex_t *boot_page_index)
@@ -51,7 +50,7 @@ void mmu_init(pgindex_t *boot_page_index)
 }
 
 void early_mm_init(void) {
-	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE);
+	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE + FREE_SPACE);
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)P2V(0), (uint32_t)&_end - KERN_BASE);
 }
 

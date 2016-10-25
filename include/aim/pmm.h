@@ -24,6 +24,18 @@
 
 #ifndef __ASSEMBLER__
 
+extern uint32_t _end;
+
+#define PAGE_START _end
+#define FREE_SPACE 4096 * PAGE_SIZE
+#define PAGE_NUM (FREE_SPACE / PAGE_SIZE)
+#define BUDDY_TREE_SIZE (PAGE_NUM * 2)
+#define LEFT_LEAF(index) (index * 2 + 1)
+#define RIGHT_LEAF(index) (index * 2 + 2)
+#define PARENT(index) ((index - 1) / 2)
+#define IS_POWER_OF_2(k) ((k & (k - 1)) == 0)
+#define MAX(a, b) (a > b ? a : b)
+
 struct pages {
 	addr_t paddr;
 	lsize_t size;

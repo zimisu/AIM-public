@@ -28,10 +28,37 @@
 #include <aim/panic.h>
 #include <libc/string.h>
 
+struct simple_page_link {
+	addr_t vaddr;
+	struct simple_page_link *next;
+};
+
+struct simple_page_link free_pages_head;
+
+struct simple_page_link *free_pages = &free_pages_head;
+
 /* dummy implementations */
-static void *__simple_alloc(size_t size, gfp_t flags) { return NULL; }
-static void __simple_free(void *obj) {}
-static size_t __simple_size(void *obj) { return 0; }
+static void *__simple_alloc(size_t size, gfp_t flags) { 
+	return NULL; 
+}
+
+static void __simple_free(void *obj) {
+
+}
+
+static size_t __simple_size(void *obj) { 
+	return 0; 
+}
+
+
+int simple_allocator_bootstrap(void *pt, size_t size) {
+
+	return 0;
+}
+
+int simple_allocator_init(void) {
+	return 0;
+}
 
 static struct simple_allocator __simple_allocator = {
 	.alloc	= __simple_alloc,
