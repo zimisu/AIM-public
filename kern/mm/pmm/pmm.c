@@ -71,7 +71,7 @@ static void __free(struct pages *pages) {
 	uint32_t left_longest, right_longest;
 
 	node_size = 1;
-	index = (pages->paddr / PAGE_SIZE) + PAGE_NUM - 1;
+	index = ((pages->paddr - PAGE_START) / PAGE_SIZE) + PAGE_NUM - 1;
 
 	for (; buddy_tree[index]; index = PARENT(index)) {
 		node_size *= 2;
@@ -80,6 +80,7 @@ static void __free(struct pages *pages) {
 	}
 
 	buddy_tree[index] = node_size;
+	kprintf("free index: %u\n", index);
 
 	while (index) {
 		index = PARENT(index);

@@ -69,18 +69,20 @@ void run_on_high_addr() {
 		4096,
 		0
 	};
+	struct pages b = a, c = a, d = a;
 	int ret;
 	ret = alloc_pages(&a);
 	kprintf("return value: %d\n", ret);
 	kprintf("alloc addr: %x\n-----\n", ((uint32_t)a.paddr));
-	ret = alloc_pages(&a);
+	ret = alloc_pages(&b);
 	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)a.paddr));
-	ret = alloc_pages(&a);
+	kprintf("alloc addr: %x\n-----\n", ((uint32_t)b.paddr));
+	ret = alloc_pages(&c);
 	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)a.paddr));
-	ret = alloc_pages(&a);
+	kprintf("alloc addr: %x\n-----\n", ((uint32_t)c.paddr));
+	free_pages(&a);
+	ret = alloc_pages(&d);
 	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)a.paddr));
+	kprintf("alloc addr: %x\n-----\n", ((uint32_t)d.paddr));
 	panic("dfghjkl!!\n");
 }
