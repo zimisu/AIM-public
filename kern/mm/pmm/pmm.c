@@ -177,4 +177,10 @@ int page_allocator_init(void) {
 			node_size /= 2;
 		buddy_tree[i] = node_size;
 	}
+	return 0;
+}
+
+
+int page_allocator_move(struct simple_allocator *old) {
+	return 0;
 }

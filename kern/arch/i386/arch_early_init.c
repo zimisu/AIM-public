@@ -95,5 +95,7 @@ void run_on_high_addr() {
 	kprintf("addr: 0x%llx   size: %llu\n", c, ksize(c));
 	d = kmalloc(55, GFP_ZERO);
 	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));
+	d = kmalloc(56, GFP_ZERO);
+	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));
 	panic("The kernel finished!!!\n");
 }

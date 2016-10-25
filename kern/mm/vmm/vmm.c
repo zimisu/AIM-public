@@ -33,6 +33,11 @@
 #define MF_USED 0xffaa0055
 #define MF_FREE 0x0055ffaa
 
+#define bh_length vp.ubh_length
+#define bh_next   vp.fbh_next
+#define BH(p) ((struct block_header *)(p))
+#define PAGE_DESC(p) ((struct page_descriptor *)(((uint32_t)p) >> 12 << 12))
+
 struct block_header {
 	unsigned long bh_flags;
 	union {
@@ -41,18 +46,12 @@ struct block_header {
 	} vp;
 };
 
-#define bh_length vp.ubh_length
-#define bh_next   vp.fbh_next
-#define BH(p) ((struct block_header *)(p))
-
 struct page_descriptor {
 	struct page_descriptor *next;
 	struct block_header *firstfree;
 	int order;
 	int nfree;
 };
-
-#define PAGE_DESC(p) ((struct page_descriptor *)(((uint32_t)p) >> 12 << 12))
 
 struct size_descriptor {
 	struct page_descriptor *firstfree;
