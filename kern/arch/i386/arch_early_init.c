@@ -27,6 +27,8 @@
 #include <mmu.h>
 #include <aim/pmm.h>
 #include <aim/vmm.h>
+#include <arch-trap.h>
+#include <lapic.h>
 
 struct segdesc gdt[NSEGS] = {
 	SEG(0x0, 0x0, 0x0, 0x0),			// null seg
@@ -63,7 +65,11 @@ void arch_early_init(void)
 
 void run_on_high_addr() {
 	kputs("high addr!\n");
-	page_allocator_init();/*
+
+	page_allocator_init();
+	trap_init();
+	lapicinit();
+	/*
 	struct pages a = {
 		0xffffffff,
 		4096,
@@ -83,7 +89,7 @@ void run_on_high_addr() {
 	free_pages(&a);
 	ret = alloc_pages(&d);
 	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)d.paddr));*/
+	kprintf("alloc addr: %x\n-----\n", ((uint32_t)d.paddr));
 
 	addr_t a, b, c, d;
 	a = kmalloc(2, GFP_ZERO);
@@ -96,6 +102,6 @@ void run_on_high_addr() {
 	d = kmalloc(55, GFP_ZERO);
 	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));
 	d = kmalloc(56, GFP_ZERO);
-	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));
+	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));*/
 	panic("The kernel finished!!!\n");
 }

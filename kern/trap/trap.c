@@ -25,6 +25,25 @@
 #include <libc/stdarg.h>
 #include <libc/stddef.h>
 #include <libc/stdio.h>
+#include <x86.h>
+#include <mmu.h>
+#include <traps.h>
+#include <arch-trap.h>
+
+struct gatedesc idt[256];
+extern uint vectors[];  
+
+void trap_init(void) {
+	int i;
+
+	for(i = 0; i < 256; i++)
+    	SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
+  	SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
+
+  	lidt(idt, sizeof(idt));
+
+  	asm("sti;");
+}
 
 long handle_syscall(long number, ...)
 {
@@ -53,3 +72,12 @@ void handle_interrupt(int irq)
 	kpdebug("<IRQ %d>\n", irq);
 }
 
+void trap(struct trapframe *tf)
+{
+	if (tf->trapno == T_SYSCALL){
+		handle_syscall((int)tf->eax);
+		return;
+	}
+	
+	handle_syscall(tf->trapno);
+}
