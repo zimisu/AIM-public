@@ -24,8 +24,8 @@ alltraps:
   addl $4, %esp
 
   # Return falls through to trapret...
-.globl trapret
-trapret:
+.globl trap_return
+trap_return:
   popal
   popl %gs
   popl %fs

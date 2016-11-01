@@ -69,7 +69,7 @@ void run_on_high_addr() {
 
 	page_allocator_init();
 	trap_init();
-	//lapicinit();
+	lapicinit();
 	ioapicinit();
 
 	asm("int $0x80;");
