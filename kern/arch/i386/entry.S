@@ -19,7 +19,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-
+#include <aim/panic.h>
+#include <mmu.h>
+#include <arch-mmu.h>
 .text
 
 .globl _start
@@ -28,7 +30,7 @@ _start:
 	cli
 	cld
 	/* Set up the stack pointer */
-	mov	$kstack_top, %esp
+	mov	$(kstack_top-KERN_BASE), %esp
 	xor	%eax, %eax
 	push	%eax		// eip=0
 	push	%eax		// ebp=0
@@ -37,3 +39,23 @@ _start:
 	/* and there we go */
 	call	master_early_init
 
+.globl open_4MB_page
+open_4MB_page:
+
+ 	movl    %cr4, %eax
+ 	orl     $(CR4_PSE), %eax;
+ 	movl    %eax, %cr4
+ 	movl    $(entrypgdir - KERN_BASE), %eax
+ 	movl    %eax, %cr3
+ 	movl    %cr0, %eax
+ 	orl     $((CR0_PG)|(CR0_WP)), %eax
+ 	movl    %eax, %cr0
+
+	mov		$(kstack_top), %esp
+	mov 	%esp, %ebp
+	/*ljmp	$(SEG_KCODE<<3), $panic*/
+	movl	$(run_on_high_addr), %eax
+	jmp		*%eax
+
+.globl _start_addr
+_start_addr = _start - KERN_BASE

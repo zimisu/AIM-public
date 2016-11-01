@@ -24,11 +24,44 @@
 
 #ifndef __ASSEMBLER__
 
+#include <aim/mmu.h>
+extern uint32_t _end;
+
+#define PAGE_START ((uint32_t)(&_end))
+#define FREE_SPACE (4096 * PAGE_SIZE)
+#define PAGE_NUM (FREE_SPACE / PAGE_SIZE)
+#define BUDDY_TREE_SIZE (PAGE_NUM * 2)
+#define LEFT_LEAF(index) (index * 2 + 1)
+#define RIGHT_LEAF(index) (index * 2 + 2)
+#define PARENT(index) ((index - 1) / 2)
+#define IS_POWER_OF_2(k) ((k & (k - 1)) == 0)
+#define MAX(a, b) (a > b ? a : b)
+
 struct pages {
 	addr_t paddr;
 	lsize_t size;
 	gfp_t flags;
 };
+
+struct page_allocator {
+	int (*alloc)(struct pages *pages);
+	void (*free)(struct pages *pages);
+	addr_t (*get_free)(void);
+};
+
+struct simple_allocator;	/* avoid including vmm */
+
+int page_allocator_init(void);
+int page_allocator_move(struct simple_allocator *old);
+void set_page_allocator(struct page_allocator *allocator);
+/* The registration above COPIES the struct. */
+
+/* 
+ * This interface may look wierd, but it prevents the page allocator from doing
+ * any kmalloc-like allocation: it either breaks a block or remove a block upon
+ * page allocation.
+ * Returns 0 for success and EOF for failure.
+ */
 
 int alloc_pages(struct pages *pages);
 int alloc_aligned_pages(struct pages *pages, lsize_t align);
@@ -54,6 +87,9 @@ static inline void pgfree(addr_t paddr)
 	p.flags = 0;
 	free_pages(&p);
 }
+
+/* initialize the page-block structure for remaining free memory */
+void add_memory_pages(void);
 
 #endif /* !__ASSEMBLER__ */
 
