@@ -42,7 +42,8 @@ void trap_init(void) {
 
   	lidt(idt, sizeof(idt));
 
-  	asm("sti;");
+  	asm("cli;");
+  	//asm("sti;");
 }
 
 long handle_syscall(long number, ...)

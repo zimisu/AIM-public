@@ -68,7 +68,7 @@ void run_on_high_addr() {
 
 	page_allocator_init();
 	trap_init();
-	lapicinit();
+	//lapicinit();
 	/*
 	struct pages a = {
 		0xffffffff,
