@@ -26,5 +26,6 @@ noinst_HEADERS = \
 	cr.h \
 	platform.h \
 	segment.h \
-	lapic.h
+	lapic.h \
+	ioapic.h
 

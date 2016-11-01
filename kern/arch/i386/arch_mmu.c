@@ -52,6 +52,7 @@ void mmu_init(pgindex_t *boot_page_index)
 void early_mm_init(void) {
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)0, (uint32_t)&_end - KERN_BASE + FREE_SPACE);
 	page_index_early_map((pgindex_t*)V2P(entrypgdir), 0, (void*)P2V(0), (uint32_t)&_end - KERN_BASE);
+	page_index_early_map((pgindex_t*)V2P(entrypgdir), (void*)V2P(0xFEC00000), 0xFEC00000, 0x1000;
 }
 
 int page_index_early_map(pgindex_t *boot_page_index, addr_t paddr,

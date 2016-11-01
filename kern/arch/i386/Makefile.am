@@ -31,5 +31,6 @@ libentry_la_SOURCES = \
 libarch_la_SOURCES = \
 	arch_early_init.c \
 	arch_mmu.c \
-	lapic.c
+	lapic.c \
+	ioapic.c
 

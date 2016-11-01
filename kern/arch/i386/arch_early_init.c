@@ -29,6 +29,7 @@
 #include <aim/vmm.h>
 #include <arch-trap.h>
 #include <lapic.h>
+#include <ioapic.h>
 
 struct segdesc gdt[NSEGS] = {
 	SEG(0x0, 0x0, 0x0, 0x0),			// null seg
@@ -68,9 +69,10 @@ void run_on_high_addr() {
 
 	page_allocator_init();
 	trap_init();
-
-	asm("int 0x80;");
 	//lapicinit();
+	ioapicinit();
+
+	asm("int $0x80;");
 	/*
 	struct pages a = {
 		0xffffffff,

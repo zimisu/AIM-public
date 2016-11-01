@@ -76,7 +76,8 @@ void handle_interrupt(int irq)
 void trap(struct trapframe *tf)
 {
 	if (tf->trapno == T_SYSCALL){
-		handle_syscall((int)tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp);
+		kprintf("%x\n", tf->eax);
+		handle_syscall(tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp);
 		return;
 	}
 	
