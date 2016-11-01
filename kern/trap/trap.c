@@ -42,7 +42,7 @@ void trap_init(void) {
 
   	lidt(idt, sizeof(idt));
 
-  	asm("cli;");
+  	//asm("cli;");
   	//asm("sti;");
 }
 
@@ -76,9 +76,9 @@ void handle_interrupt(int irq)
 void trap(struct trapframe *tf)
 {
 	if (tf->trapno == T_SYSCALL){
-		handle_syscall((int)tf->eax);
+		handle_syscall((int)tf->eax, tf->ebx, tf->ecx, tf->edx, tf->esi, tf->edi, tf->ebp);
 		return;
 	}
 	
-	handle_syscall(tf->trapno);
+	handle_interrupt(tf->trapno);
 }

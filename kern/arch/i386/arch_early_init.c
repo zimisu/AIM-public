@@ -68,6 +68,8 @@ void run_on_high_addr() {
 
 	page_allocator_init();
 	trap_init();
+
+	asm("int 0x80;");
 	//lapicinit();
 	/*
 	struct pages a = {
