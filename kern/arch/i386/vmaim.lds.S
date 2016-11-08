@@ -43,13 +43,6 @@ SECTIONS
 		*(.data);
 	}
 
-	.bss : {
-		*(.bss);
-		. = ALIGN(4096);
-		PROVIDE(kstack = .);
-		. += KSTACKSIZE;
-		PROVIDE(kstack_top = .);
-	}
 	.caonima : {
 		//PROVIDE(helloaaaa = .);
 		//. += 8;
@@ -57,6 +50,13 @@ SECTIONS
 		NORM_INIT(8);
 		LATE_INIT(8);
 		//PROVIDE(lohhaaaaa = .);
+	}
+	.bss : {
+		*(.bss);
+		. = ALIGN(4096);
+		PROVIDE(kstack = .);
+		. += KSTACKSIZE;
+		PROVIDE(kstack_top = .);
 	}
 	. = ALIGN(4096);
 	_end = .;
