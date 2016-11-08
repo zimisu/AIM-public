@@ -89,9 +89,14 @@ int do_early_initcalls() {
 int do_initcalls() {
 	initcall_t *fn;
 	kprintf("start=0x%x, end=0x%x\n", (uint32_t)&norm_init_start, (uint32_t)&norm_init_end);
-	// for (fn = &norm_init_start; fn < &norm_init_end; fn++) {
-	// 	kputs("hello do_initcalls!\n");
-	// 	(*fn)();
-	// }
+	for (fn = (initcall_t *)&norm_init_start; fn < (initcall_t *)&norm_init_end; fn++) {
+		kprintf	("hello do_initcalls!  fn: 0x%x\n", *fn);
+		//(*fn)();
+	}
 	return 0;
 }
+
+void initdev(struct device *dev, int class, const char *devname, dev_t devno,
+    struct driver *drv){}
+
+void register_driver(unsigned int major, struct driver *drv){}

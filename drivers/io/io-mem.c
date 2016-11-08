@@ -35,6 +35,10 @@
 #include <aim/mmu.h>
 #include <aim/panic.h>
 #include <errno.h>
+#include <aim/device.h>
+#include <aim/vmm.h>
+#include <libc/string.h>
+#include <aim/initcalls.h>
 
 #include <io-mem.h>
 

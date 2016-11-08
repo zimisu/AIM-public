@@ -28,7 +28,11 @@
 #include <aim/mmu.h>
 #include <aim/panic.h>
 #include <errno.h>
-
+#include <aim/device.h>
+#include <aim/vmm.h>
+#include <aim/console.h>
+#include <aim/initcalls.h>
+ 
 #include <io-port.h>
 
 #ifdef IO_PORT_ROOT
