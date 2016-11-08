@@ -22,6 +22,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <libc/string.h>
 //#include <aim/sync.h>
 #include <aim/vmm.h>
 #include <aim/pmm.h>
