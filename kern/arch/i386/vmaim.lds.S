@@ -22,6 +22,8 @@
 
 #define __LDSCRIPT__
 
+#include <asm-generic/vmaim.lds.h>
+
 /*
  * Using the C preprocessor, we allow includes and macro expansion in this
  * linker script.
@@ -49,6 +51,12 @@ SECTIONS
 		PROVIDE(kstack_top = .);
 	}
 	. = ALIGN(4096);
+	.init : {
+		EARLY_INIT(4096)
+		NORM_INIT(4096)
+		LATE_INIT(align)
+	}
 	_end = .;
+
 }
 
