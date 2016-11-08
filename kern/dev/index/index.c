@@ -90,7 +90,7 @@ int do_initcalls() {
 	initcall_t *fn;
 	kprintf("start=0x%x, end=0x%x\n", (uint32_t)&norm_init_start, (uint32_t)&norm_init_end);
 	for (fn = (initcall_t *)&norm_init_start; fn < (initcall_t *)&norm_init_end; fn++) {
-		kprintf	("hello do_initcalls!  fn: 0x%x\n", *fn);
+		kprintf	("hello do_initcalls!   fn: 0x%x\n", *fn);
 		//(*fn)();
 	}
 	return 0;
