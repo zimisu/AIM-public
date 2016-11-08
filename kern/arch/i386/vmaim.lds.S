@@ -43,7 +43,7 @@ SECTIONS
 		*(.data);
 	}
 
-	.caonima : {
+	.init : {
 		EARLY_INIT(8);
 		NORM_INIT(8);
 		LATE_INIT(8);
