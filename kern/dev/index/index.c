@@ -80,3 +80,13 @@ struct device *dev_from_name(char *name)
 	return __index.from_name(name);
 }
 
+int do_early_initcalls() {
+	return 0;
+}
+
+int do_initcalls() {
+	initcall_t *fn;
+	for (fn = &early_init_start; fn < &late_init_end; fn++)
+		(*fn)();
+	return 0;
+}

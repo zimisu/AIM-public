@@ -54,7 +54,7 @@ SECTIONS
 	.init : {
 		EARLY_INIT(4096)
 		NORM_INIT(4096)
-		LATE_INIT(align)
+		LATE_INIT(4096)
 	}
 	_end = .;
 

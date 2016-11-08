@@ -71,6 +71,9 @@ void run_on_high_addr() {
 	trap_init();
 	lapicinit();
 	ioapicinit();
+	do_early_initcalls();
+	do_initcalls();
+
 
 	asm("int $0x80;");
 	/*
