@@ -27,8 +27,10 @@
 #include <sys/types.h>
 #include <aim/device.h>
 
+#include <aim/console.h>
 #include <libc/string.h>
-
+#include <aim/initcalls.h>
+extern uint32_t norm_init_start, norm_init_end;
 /*
  * Some dummy implementations could return failures if interfaces
  * are called before implementations are ready. This eliminates some NULL
@@ -86,7 +88,10 @@ int do_early_initcalls() {
 
 int do_initcalls() {
 	initcall_t *fn;
-	for (fn = &early_init_start; fn < &late_init_end; fn++)
-		(*fn)();
+	kprintf("start=0x%x, end=0x%x\n", (uint32_t)&norm_init_start, (uint32_t)&norm_init_end);
+	// for (fn = &norm_init_start; fn < &norm_init_end; fn++) {
+	// 	kputs("hello do_initcalls!\n");
+	// 	(*fn)();
+	// }
 	return 0;
 }

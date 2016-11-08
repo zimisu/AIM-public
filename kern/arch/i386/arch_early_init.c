@@ -30,6 +30,10 @@
 #include <arch-trap.h>
 #include <lapic.h>
 #include <ioapic.h>
+#include <aim/initcalls.h>
+#include <aim/console.h>
+#include <aim/panic.h>
+#include <aim/trap.h>
 
 struct segdesc gdt[NSEGS] = {
 	SEG(0x0, 0x0, 0x0, 0x0),			// null seg

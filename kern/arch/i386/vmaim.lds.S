@@ -50,12 +50,15 @@ SECTIONS
 		. += KSTACKSIZE;
 		PROVIDE(kstack_top = .);
 	}
-	. = ALIGN(4096);
-	.init : {
-		EARLY_INIT(4096)
-		NORM_INIT(4096)
-		LATE_INIT(4096)
+	.caonima : {
+		//PROVIDE(helloaaaa = .);
+		//. += 8;
+		EARLY_INIT(8);
+		NORM_INIT(8);
+		LATE_INIT(8);
+		//PROVIDE(lohhaaaaa = .);
 	}
+	. = ALIGN(4096);
 	_end = .;
 
 }
