@@ -19,7 +19,15 @@
 static inline
 uint8_t inb(uint16_t port)
 {
-	return 0;
+	uint8_t data;
+	asm volatile (
+		"in %[port], %[data];"
+		:
+		[data] "=a" (data)	// A reg
+		:
+		[port] "Nd" (port)	// imm8 or D reg
+	);
+	return data;
 }
 
 static inline
@@ -35,8 +43,30 @@ uint32_t inl(uint16_t port)
 }
 
 static inline
+void insl(int port, void *addr, int cnt)
+{
+	asm volatile (
+		"rep insl;"
+		:
+		"+D" (addr),	// DI reg
+		"+c" (cnt)	// C reg
+		:
+		"d" (port)	// D reg
+		:
+		"memory",
+		 "cc"
+	);
+}
+
+static inline
 void outb(uint16_t port, uint8_t data)
 {
+	asm volatile (
+		"out %[data], %[port];"
+		::
+		[data] "a" (data),	// A reg
+		[port] "Nd" (port)	// imm8 or D reg
+	);
 }
 
 static inline
@@ -47,5 +77,21 @@ void outw(uint16_t port, uint8_t data)
 static inline
 void outl(uint16_t port, uint8_t data)
 {
+}
+
+static inline
+void stosb(void *addr, int data, int cnt)
+{
+	asm volatile (
+		"rep stosb;"
+		:
+		"+D" (addr),	// DI reg
+		"+c" (cnt)	// C reg
+		:
+		"a" (data)	// A reg
+		:
+		"memory",
+		"cc"
+	);
 }
 

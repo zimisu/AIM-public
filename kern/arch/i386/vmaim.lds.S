@@ -22,10 +22,41 @@
 
 #define __LDSCRIPT__
 
+#include <asm-generic/vmaim.lds.h>
+
 /*
  * Using the C preprocessor, we allow includes and macro expansion in this
  * linker script.
  */
 
-ENTRY(_start)
+ENTRY(_start_addr)
+
+SECTIONS
+{
+	. = KERN_BASE + KERN_START;
+
+	.text : AT(KERN_START) {
+		*(.text);
+	}
+
+	.data : {
+		*(.data);
+	}
+
+	.init : {
+		EARLY_INIT(8);
+		NORM_INIT(8);
+		LATE_INIT(8);
+	}
+	.bss : {
+		*(.bss);
+		. = ALIGN(4096);
+		PROVIDE(kstack = .);
+		. += KSTACKSIZE;
+		PROVIDE(kstack_top = .);
+	}
+	. = ALIGN(4096);
+	_end = .;
+
+}
 

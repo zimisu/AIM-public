@@ -21,6 +21,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <sys/types.h>
+#include <aim/panic.h>
 #include <aim/console.h>
 #include <aim/device.h>
 #include <aim/early_kmmap.h>
@@ -56,7 +57,6 @@ void master_early_init(void)
 	if (early_devices_init() < 0)
 		goto panic;
 	/* other preperations, including early secondary buses */
-	arch_early_init();
 	if (early_console_init(
 		EARLY_CONSOLE_BUS,
 		EARLY_CONSOLE_BASE,
@@ -64,6 +64,8 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
+
+	arch_early_init();
 
 	goto panic;
 

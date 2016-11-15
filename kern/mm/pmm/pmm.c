@@ -23,15 +23,79 @@
 #include <sys/types.h>
 #include <sys/param.h>
 //#include <aim/sync.h>
-#include <aim/mmu.h>
 #include <aim/pmm.h>
 #include <libc/string.h>
 #include <util.h>
 
+uint32_t buddy_tree[BUDDY_TREE_SIZE];
+
+static uint32_t fixsize(uint32_t size) {
+	size = (size + PAGE_SIZE - 1) >> 12;
+	while (size) {
+		if (IS_POWER_OF_2(size)) 
+			return size;
+		size += (((size - 1) ^ size) & size);
+	}
+}
+
 /* dummy implementations */
-static int __alloc(struct pages *pages) { return EOF; }
-static void __free(struct pages *pages) {}
-static addr_t __get_free(void) { return 0; }
+static int __alloc(struct pages *pages) {
+	uint32_t index = 0;
+	uint32_t fixed_size = fixsize(pages->size);
+	uint32_t node_size;
+	addr_t result;
+
+	if (buddy_tree[index] < fixed_size)
+		return -1;
+
+	for (node_size = PAGE_NUM; node_size != fixed_size; node_size /= 2) {
+		if (buddy_tree[LEFT_LEAF(index)] >= fixed_size)
+			index = LEFT_LEAF(index);
+		else index = RIGHT_LEAF(index);
+	}
+
+	kprintf("fixed_size: %u   _end: %x  PAGE_NUM: %u\n", fixed_size, &_end, PAGE_NUM);
+	kprintf("index: %u   node_size: %u\n  PAGE_SIZE: %u\n", index, node_size, PAGE_SIZE);
+	buddy_tree[index] = 0;
+	pages->paddr = ((index + 1) * node_size - PAGE_NUM) * PAGE_SIZE + PAGE_START;
+	kprintf("get page addr: %x\n------------\n\n", pages->paddr);
+	while (index) {
+		index = PARENT(index);
+		buddy_tree[index] = MAX(buddy_tree[LEFT_LEAF(index)], buddy_tree[RIGHT_LEAF(index)]);
+	}
+
+	return 0;
+}
+static void __free(struct pages *pages) {
+	uint32_t node_size, index = 0;
+	uint32_t left_longest, right_longest;
+
+	node_size = 1;
+	index = ((pages->paddr - PAGE_START) / PAGE_SIZE) + PAGE_NUM - 1;
+
+	for (; buddy_tree[index]; index = PARENT(index)) {
+		node_size *= 2;
+		if (index == 0)
+			return;
+	}
+
+	buddy_tree[index] = node_size;
+	kprintf("free index: %u\n", index);
+
+	while (index) {
+		index = PARENT(index);
+		node_size *= 2;
+		left_longest = buddy_tree[LEFT_LEAF(index)];
+		right_longest = buddy_tree[RIGHT_LEAF(index)];
+		if (left_longest + right_longest == node_size)
+			buddy_tree[index] = node_size;
+		else 
+			buddy_tree[index] = MAX(left_longest, right_longest);
+	}
+}
+static addr_t __get_free(void) {
+	return buddy_tree[0] * PAGE_SIZE;
+}
 
 static struct page_allocator __allocator = {
 	.alloc		= __alloc,
@@ -106,3 +170,17 @@ addr_t get_free_memory(void)
 	return __allocator.get_free();
 }
 
+int page_allocator_init(void) {
+	uint32_t node_size = PAGE_NUM;
+	for (int i = 0; i < BUDDY_TREE_SIZE; i++) {
+		if (IS_POWER_OF_2(i + 1) && i)
+			node_size /= 2;
+		buddy_tree[i] = node_size;
+	}
+	return 0;
+}
+
+
+int page_allocator_move(struct simple_allocator *old) {
+	return 0;
+}

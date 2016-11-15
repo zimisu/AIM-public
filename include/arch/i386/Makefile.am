@@ -25,5 +25,9 @@ noinst_HEADERS = \
 	arch-sync.h \
 	arch-trap.h \
 	asm.h \
-	platform.h
+	cr.h \
+	platform.h \
+	segment.h \
+	lapic.h \
+	ioapic.h
 
