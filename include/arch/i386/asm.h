@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef __ASM_H__
+#define __ASM_H__
 
 static inline
 uint8_t inb(uint16_t port)
@@ -95,3 +97,4 @@ void stosb(void *addr, int data, int cnt)
 	);
 }
 
+#endif

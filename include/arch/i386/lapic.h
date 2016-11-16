@@ -3,4 +3,6 @@
 
 void lapicinit(void);
 
+int cpunum(void);
+
 #endif

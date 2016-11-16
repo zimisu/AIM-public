@@ -34,6 +34,7 @@
 #include <aim/console.h>
 #include <aim/panic.h>
 #include <aim/trap.h>
+#include <proc.h>
 
 struct segdesc gdt[NSEGS] = {
 	SEG(0x0, 0x0, 0x0, 0x0),			// null seg
@@ -43,6 +44,7 @@ struct segdesc gdt[NSEGS] = {
 	SEG(STA_W, 0, 0xffffffff, DPL_USER)		// user data
 };
 
+static void startothers(void);
 
 __noreturn void open_4MB_page();
 void arch_early_init(void)
@@ -78,41 +80,66 @@ void run_on_high_addr() {
 	do_early_initcalls();
 	do_initcalls();
 
+	startothers();
 
 	asm("int $0x80;");
-	/*
-	struct pages a = {
-		0xffffffff,
-		4096,
-		0
-	};
-	struct pages b = a, c = a, d = a;
-	int ret;
-	ret = alloc_pages(&a);
-	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)a.paddr));
-	ret = alloc_pages(&b);
-	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)b.paddr));
-	ret = alloc_pages(&c);
-	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)c.paddr));
-	free_pages(&a);
-	ret = alloc_pages(&d);
-	kprintf("return value: %d\n", ret);
-	kprintf("alloc addr: %x\n-----\n", ((uint32_t)d.paddr));
-
-	addr_t a, b, c, d;
-	a = kmalloc(2, GFP_ZERO);
-	kprintf("addr: 0x%llx   size: %llu\n", a, ksize(a));
-	b = kmalloc(5, GFP_ZERO);
-	kprintf("addr: 0x%llx   size: %llu\n", b, ksize(b));
-	kfree(a);
-	c = kmalloc(15, GFP_ZERO);
-	kprintf("addr: 0x%llx   size: %llu\n", c, ksize(c));
-	d = kmalloc(55, GFP_ZERO);
-	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));
-	d = kmalloc(56, GFP_ZERO);
-	kprintf("addr: 0x%llx   size: %llu\n", d, ksize(d));*/
 	panic("The kernel finished!!!\n");
+}
+
+
+// Common CPU setup code.
+extern struct gatedesc idt[256];
+static void
+mpmain(void)
+{
+	struct cpu *cpu= get_cpu();
+ 	kprintf("cpu%d: starting\n", cpunum());
+	lidt(idt, sizeof(idt)); // load idt register
+	xchg(&cpu->started, 1); // tell startothers() we're up
+  //scheduler();     // start running processes
+}
+
+// Other CPUs jump here from entryother.S.
+static void
+mpenter(void)
+{
+	lgdt(gdt, sizeof(gdt));
+	lapicinit();
+	mpmain();
+}
+
+// Start the non-boot (AP) processors.
+static void
+startothers(void)
+{
+  extern uchar start[], entryother_end[];
+  extern int ncpu;
+  uchar *code;
+  struct cpu *c;
+  char *stack;
+
+  // Write entry code to unused memory at 0x7000.
+  // The linker has placed the image of entryother.S in
+  // _binary_entryother_start.
+  code = P2V(0x7000);
+  memcpy(code, start, (uint)(entryother_end - start));
+
+  for(c = cpus; c < cpus+ncpu ; c++){
+    if(c == cpus+cpunum())  // We've started already.
+      continue;
+
+    // Tell entryother.S what stack to use, where to enter, and what
+    // pgdir to use. We cannot use kpgdir yet, because the AP processor
+    // is running in low  memory, so we use entrypgdir for the APs too.
+    stack = kalloc();
+    *(void**)(code-4) = stack + KSTACKSIZE;
+    *(void**)(code-8) = mpenter;
+    *(int**)(code-12) = (void *) V2P(entrypgdir);
+
+    lapicstartap(c->apicid, V2P(code));
+
+    // wait for cpu to finish mpmain()
+    while(c->started == 0)
+      ;
+  }
 }
