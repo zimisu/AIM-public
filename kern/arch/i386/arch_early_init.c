@@ -128,7 +128,7 @@ startothers(void)
 
   void * mp_addr = run_mp;
   kprintf("run_mp addr: %x,  %x\n", mp_addr, &mp_addr);
-  memcpy(P2V(0x7000 - 4), &mp_addr, 4);
+  memcpy(P2V(0x7000 - 8), &mp_addr, 4);
 
   // Write entry code to unused memory at 0x7000.
   // The linker has placed the image of entryother.S in
