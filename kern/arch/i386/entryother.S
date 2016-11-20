@@ -63,16 +63,17 @@ start32:
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
-  orl     $(CR0_PE|CR0_PG|CR0_WP), %eax
+  orl     $(CR0_PG|CR0_WP), %eax
+  # orl     $(CR0_PE|CR0_PG|CR0_WP), %eax
   movl    %eax, %cr0
 
   # Switch to the stack allocated by startothers()
-  # movl  $(run_mp), %eax
-  # jmp   *%eax
+  movl  $(run_mp), %eax
+  jmp   *%eax
   nop
   nop
-  push    %eax
-  hlt
+  nop
+  nop
   call    run_mp
 
   movl    (0x7000 - 4), %esp
