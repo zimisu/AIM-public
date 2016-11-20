@@ -1,8 +1,11 @@
 #include <sys/types.h>
 #include <lapic.h>
+#include <arch-mmu.h>
+#include <mmu.h>
 // Per-CPU state
-#define NCPU          8  // maximum number of CPUs
+#define NCPU          2  // maximum number of CPUs
 #define NOFILE       16  // open files per process
+#define NSEGS         7
 struct cpu {
   uchar apicid;                // Local APIC ID
   struct context *scheduler;   // swtch() here to enter scheduler

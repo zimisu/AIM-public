@@ -76,8 +76,12 @@ start32:
   outw    %ax, %dx
   movw    $0x8ae0, %ax
   outw    %ax, %dx
+
+  movl  $(run_mp), %eax
+  jmp   *%eax
+  /*
 spin:
-  jmp     spin
+  jmp     spin*/
 
 .p2align 2
 gdt:

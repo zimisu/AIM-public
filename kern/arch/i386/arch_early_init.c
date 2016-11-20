@@ -35,6 +35,8 @@
 #include <aim/panic.h>
 #include <aim/trap.h>
 #include <proc.h>
+#include <aim/pmm.h>
+#include <aim/vmm.h>
 
 struct segdesc gdt[NSEGS] = {
 	SEG(0x0, 0x0, 0x0, 0x0),			// null seg
@@ -80,12 +82,11 @@ void run_on_high_addr() {
 	do_early_initcalls();
 	do_initcalls();
 
+	mpinit();
 	startothers();
 
-	asm("int $0x80;");
 	panic("The kernel finished!!!\n");
 }
-
 
 // Common CPU setup code.
 extern struct gatedesc idt[256];
@@ -93,7 +94,8 @@ static void
 mpmain(void)
 {
 	struct cpu *cpu= get_cpu();
- 	kprintf("cpu%d: starting\n", cpunum());
+
+ 	kprintf("----------------\ncpu%d: starting\n---------\n", cpunum());
 	lidt(idt, sizeof(idt)); // load idt register
 	xchg(&cpu->started, 1); // tell startothers() we're up
   //scheduler();     // start running processes
@@ -125,13 +127,15 @@ startothers(void)
   memcpy(code, start, (uint)(entryother_end - start));
 
   for(c = cpus; c < cpus+ncpu ; c++){
+  	kprintf("cpunum: %d\n", cpunum());
     if(c == cpus+cpunum())  // We've started already.
       continue;
+  	kprintf("cpu num: %x\n", c);
 
     // Tell entryother.S what stack to use, where to enter, and what
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
-    stack = kalloc();
+    stack = pgalloc();
     *(void**)(code-4) = stack + KSTACKSIZE;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
@@ -142,4 +146,8 @@ startothers(void)
     while(c->started == 0)
       ;
   }
+}
+
+void run_mp() {
+	mpmain();
 }
