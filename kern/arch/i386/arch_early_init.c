@@ -128,7 +128,6 @@ startothers(void)
 
   void * mp_addr = run_mp;
   kprintf("run_mp addr: %x,  %x\n", mp_addr, &mp_addr);
-  memcpy(P2V(0x7000 - 8), &mp_addr, 4);
 
   // Write entry code to unused memory at 0x7000.
   // The linker has placed the image of entryother.S in
@@ -148,7 +147,7 @@ startothers(void)
     // is running in low  memory, so we use entrypgdir for the APs too.
     stack = pgalloc();
     *(void**)(code-4) = stack + KSTACKSIZE;
-    *(void**)(code-8) = mpenter;
+    *(void**)(code-8) = run_mp;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
 
     lapicstartap(c->apicid, V2P(code));
