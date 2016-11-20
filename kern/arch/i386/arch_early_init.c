@@ -96,11 +96,10 @@ mpmain(void)
 	//struct cpu *cpu= cpus + get_cpu();
 	lidt(idt, sizeof(idt)); // load idt register
 	int cpu_num = cpunum();
- 	kprintf("----------------\ncpu%d: starting\n---------\n", cpu_num);
 	//asm("hlt");
 	xchg(&(cpus[cpu_num].started), 1); // tell startothers() we're up
 
-	kputs("hello mpmain\n");
+ 	kprintf("----------------\ncpu%d: starting\n---------\n", cpu_num);
 	while(1);
   //scheduler();     // start running processes
 }
@@ -132,7 +131,8 @@ startothers(void)
 
   kprintf("ncpu: %d\n", ncpu);
   for(c = cpus; c < cpus+ncpu ; c++){
-    if(c == cpus+cpunum())  // We've started already.
+  	int cpu_num = cpunum();
+    if(c == cpus+cpu_num)  // We've started already.
       continue;
 
     // Tell entryother.S what stack to use, where to enter, and what
@@ -148,7 +148,5 @@ startothers(void)
     // wait for cpu to finish mpmain()
     while(c->started == 0)
       ;
-  	kputs("cpu0 ok!");
-  	asm("hlt");
   }
 }

@@ -3,7 +3,7 @@
 #include <arch-mmu.h>
 #include <mmu.h>
 // Per-CPU state
-#define NCPU          2  // maximum number of CPUs
+#define NCPU          4  // maximum number of CPUs
 #define NOFILE       16  // open files per process
 #define NSEGS         7
 struct cpu {
