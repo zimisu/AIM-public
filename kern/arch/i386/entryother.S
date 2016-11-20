@@ -45,6 +45,7 @@ start:
 //PAGEBREAK!
 .code32  # Tell assembler to generate 32-bit code now.
 start32:
+
   # Set up the protected-mode data segment registers
   movw    $(SEG_KDATA<<3), %ax    # Our data segment selector
   movw    %ax, %ds                # -> DS: Data Segment
@@ -58,7 +59,7 @@ start32:
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Use entrypgdir as our initial page table
-  movl    (entrypgdir - KERN_BASE), %eax
+  movl    $(entrypgdir - KERN_BASE), %eax
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
@@ -66,18 +67,19 @@ start32:
   movl    %eax, %cr0
 
   # Switch to the stack allocated by startothers()
-  movl    (start-4), %esp
+  movl  $(run_mp), %eax
+  nop
+  nop
+  jmp   *%eax
+  movl    (0x7000 - 4), %esp
   # Call mpenter()
-  call	 *(start-8)
+  call	 *(0x7000 - 8)
 
   movw    $0x8a00, %ax
   movw    %ax, %dx
   outw    %ax, %dx
   movw    $0x8ae0, %ax
   outw    %ax, %dx
-  hlt
-  movl  $(run_mp - KERN_BASE), %eax
-  jmp   *%eax
   /*
 spin:
   jmp     spin*/
