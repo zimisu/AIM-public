@@ -67,10 +67,14 @@ start32:
   movl    %eax, %cr0
 
   # Switch to the stack allocated by startothers()
-  movl  $(run_mp), %eax
+  # movl  $(run_mp), %eax
+  # jmp   *%eax
   nop
   nop
-  jmp   *%eax
+  push    %eax
+  hlt
+  call    run_mp
+
   movl    (0x7000 - 4), %esp
   # Call mpenter()
   call	 *(0x7000 - 8)

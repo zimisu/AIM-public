@@ -110,6 +110,12 @@ mpenter(void)
 	mpmain();
 }
 
+void run_mp() {
+	asm("hlt;");
+	kputs("haha!!!!!!!!!!  another cpu!\n");
+	mpmain();
+}
+
 // Start the non-boot (AP) processors.
 static void
 startothers(void)
@@ -119,6 +125,10 @@ startothers(void)
   uchar *code;
   struct cpu *c;
   char *stack;
+
+  void * mp_addr = run_mp;
+  kprintf("run_mp addr: %x,  %x\n", mp_addr, &mp_addr);
+  memcpy(P2V(0x7000 - 4), &mp_addr, 4);
 
   // Write entry code to unused memory at 0x7000.
   // The linker has placed the image of entryother.S in
@@ -147,9 +157,4 @@ startothers(void)
     while(c->started == 0)
       ;
   }
-}
-
-void run_mp() {
-	kprintf("haha!!!!!!!!!!  another cpu!\n");
-	mpmain();
 }
