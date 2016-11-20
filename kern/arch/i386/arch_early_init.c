@@ -126,6 +126,7 @@ startothers(void)
   code = P2V(0x7000);
   memcpy(code, start, (uint)(entryother_end - start));
 
+  kprintf("ncpu: %d\n", ncpu);
   for(c = cpus; c < cpus+ncpu ; c++){
   	kprintf("cpunum: %d\n", cpunum());
     if(c == cpus+cpunum())  // We've started already.
@@ -149,5 +150,6 @@ startothers(void)
 }
 
 void run_mp() {
+	kprintf("haha!!!!!!!!!!  another cpu!\n");
 	mpmain();
 }

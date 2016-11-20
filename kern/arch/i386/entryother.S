@@ -1,6 +1,7 @@
 #include "segment.h"
 #include "mmu.h"
-	
+#include <config.h>
+
 # Each non-boot CPU ("AP") is started up in response to a STARTUP
 # IPI from the boot CPU.  Section B.4.2 of the Multi-Processor
 # Specification says that the AP will start in real mode with CS:IP
@@ -18,11 +19,11 @@
 #
 # This code combines elements of bootasm.S and entry.S.
 
+
 .code16           
 .globl start
 start:
-  cli            
-
+  cli     
   # Zero data segment registers DS, ES, and SS.
   xorw    %ax,%ax
   movw    %ax,%ds
@@ -36,7 +37,6 @@ start:
   movl    %cr0, %eax
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
-
   # Complete the transition to 32-bit protected mode by using a long jmp
   # to reload %cs and %eip.  The segment descriptors are set up with no
   # translation, so that the mapping is still the identity mapping.
@@ -53,13 +53,12 @@ start32:
   movw    $0, %ax                 # Zero segments not ready for use
   movw    %ax, %fs                # -> FS
   movw    %ax, %gs                # -> GS
-
   # Turn on page size extension for 4Mbyte pages
   movl    %cr4, %eax
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Use entrypgdir as our initial page table
-  movl    (start-12), %eax
+  movl    (entrypgdir - KERN_BASE), %eax
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
@@ -76,8 +75,8 @@ start32:
   outw    %ax, %dx
   movw    $0x8ae0, %ax
   outw    %ax, %dx
-
-  movl  $(run_mp), %eax
+  hlt
+  movl  $(run_mp - KERN_BASE), %eax
   jmp   *%eax
   /*
 spin:
@@ -92,7 +91,7 @@ gdt:
 
 gdtdesc:
   .word   (gdtdesc - gdt - 1)
-  .long   gdt
+  .long   gdt - start + 0x7000
 
 .globl entryother_end
 entryother_end:
