@@ -77,7 +77,6 @@ start32:
   nop
   call    run_mp
 */
-hlt
   movl    (0x7000 - 4), %esp
   # Call mpenter()
   call	 *(0x7000 - 8)

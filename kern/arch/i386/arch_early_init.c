@@ -93,11 +93,15 @@ extern struct gatedesc idt[256];
 static void
 mpmain(void)
 {
-	struct cpu *cpu= get_cpu();
-
- 	kprintf("----------------\ncpu%d: starting\n---------\n", cpunum());
+	//struct cpu *cpu= cpus + get_cpu();
 	lidt(idt, sizeof(idt)); // load idt register
-	xchg(&cpu->started, 1); // tell startothers() we're up
+	int cpu_num = cpunum();
+ 	kprintf("----------------\ncpu%d: starting\n---------\n", cpu_num);
+	//asm("hlt");
+	xchg(&(cpus[cpu_num].started), 1); // tell startothers() we're up
+
+	kputs("hello mpmain\n");
+	while(1);
   //scheduler();     // start running processes
 }
 
@@ -107,12 +111,6 @@ mpenter(void)
 {
 	lgdt(gdt, sizeof(gdt));
 	lapicinit();
-	mpmain();
-}
-
-void run_mp() {
-	asm("hlt;");
-	kputs("haha!!!!!!!!!!  another cpu!\n");
 	mpmain();
 }
 
@@ -126,9 +124,6 @@ startothers(void)
   struct cpu *c;
   char *stack;
 
-  void * mp_addr = run_mp;
-  kprintf("run_mp addr: %x,  %x\n", mp_addr, &mp_addr);
-
   // Write entry code to unused memory at 0x7000.
   // The linker has placed the image of entryother.S in
   // _binary_entryother_start.
@@ -137,17 +132,15 @@ startothers(void)
 
   kprintf("ncpu: %d\n", ncpu);
   for(c = cpus; c < cpus+ncpu ; c++){
-  	kprintf("cpunum: %d\n", cpunum());
     if(c == cpus+cpunum())  // We've started already.
       continue;
-  	kprintf("cpu num: %x\n", c);
 
     // Tell entryother.S what stack to use, where to enter, and what
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
     stack = pgalloc();
     *(void**)(code-4) = stack + KSTACKSIZE;
-    *(void**)(code-8) = run_mp;
+    *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
 
     lapicstartap(c->apicid, V2P(code));
@@ -155,5 +148,7 @@ startothers(void)
     // wait for cpu to finish mpmain()
     while(c->started == 0)
       ;
+  	kputs("cpu0 ok!");
+  	asm("hlt");
   }
 }
