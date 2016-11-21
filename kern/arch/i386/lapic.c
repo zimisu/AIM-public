@@ -172,3 +172,7 @@ lapicstartap(uchar apicid, uint addr)
     microdelay(200);
   }
 }
+
+void stop_other_cpus(void) {
+  lapicw(ICRLO, BCAST| LEVEL | 0x81);
+}

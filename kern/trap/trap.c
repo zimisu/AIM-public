@@ -71,6 +71,9 @@ long handle_syscall(long number, ...)
 void handle_interrupt(int irq)
 {
 	kpdebug("<IRQ %d>\n", irq);
+	if (irq == 0x81) {
+		kpdebug("@\n");
+	}
 }
 
 void trap(struct trapframe *tf)

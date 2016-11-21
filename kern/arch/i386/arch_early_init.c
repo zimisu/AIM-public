@@ -98,8 +98,8 @@ mpmain(void)
 	int cpu_num = cpunum();
 	//asm("hlt");
 	xchg(&(cpus[cpu_num].started), 1); // tell startothers() we're up
-
- 	kprintf("----------------\ncpu%d: starting\n---------\n", cpu_num);
+	sti();
+ 	kprintf("cpu%d: starting\n\n", cpu_num);
 	while(1);
   //scheduler();     // start running processes
 }
@@ -146,7 +146,7 @@ startothers(void)
     lapicstartap(c->apicid, V2P(code));
 
     // wait for cpu to finish mpmain()
-    while(c->started == 0)
-      ;
+    while(c->started == 0);
   }
+  stop_other_cpus();
 }
