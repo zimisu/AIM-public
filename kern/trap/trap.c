@@ -29,6 +29,7 @@
 #include <mmu.h>
 #include <traps.h>
 #include <arch-trap.h>
+#include <lapic.h>
 
 struct gatedesc idt[256];
 extern uint vectors[];  
@@ -70,9 +71,9 @@ long handle_syscall(long number, ...)
 
 void handle_interrupt(int irq)
 {
-	kpdebug("<IRQ %d>\n", irq);
+	kpdebug("<cpu%d: IRQ 0x%x (%d)>\n", cpunum(), irq, irq);
 	if (irq == 0x81) {
-		kpdebug("@\n");
+		kpdebug("@cpu%d: interrrupted!\n", cpunum());
 	}
 }
 
